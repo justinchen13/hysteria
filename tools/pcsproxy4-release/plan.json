@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "status": "ROOT_REVIEWED_REMOTE_BUILD_ONLY",
+  "prepared_utc": "2026-10-18T13:25:34Z",
+  "repository": "justinchen13/hysteria",
+  "ref": "refs/heads/pcs/udp-resolution-context",
+  "source_commit": "06ab4eaea8e6c0ad85e0eebeb43d51773af7fcc4",
+  "helper_path": "tools/pcs-udp-resolution-context/verify.py",
+  "go": "1.25.6",
+  "ldflags_fields": {
+    "appVersion": "v2.6.4-pcsproxy4",
+    "appCommit": "06ab4eaea8e6c0ad85e0eebeb43d51773af7fcc4",
+    "appDate": "2026-10-18T13:25:34Z",
+    "appType": "pcs",
+    "appToolchain": "go1.25.6",
+    "appPlatform": "linux",
+    "appArch": "amd64",
+    "libVersion": "v0.54.1-0.20250907230547-eb32f8aec5e2"
+  },
+  "identity_changes_only": [
+    "appVersion",
+    "appDate",
+    "appType"
+  ],
+  "prior_test_binary_sha256": "7da47f5b97cf92bb61ddfc8ebec4ce2941e9dfe6301875666fc7420e9fe8ebb6",
+  "module_sha256": {
+    "core/go.mod": "abcd07f35442183aa8207bec00a3b25ce211d9aac4b52b330a0085b826c693f1",
+    "core/go.sum": "2c2aad0042b72002d7c0492d6833eb052d5597991e11214b337fe0a0a86ffaba",
+    "extras/go.mod": "1067441b77e903c5937a4269660bd1329031929744fb19c5114a35df1f0f2688",
+    "extras/go.sum": "f9b8beefc668ee3efe009ec55830b909089404a719cf8426afcfbb5d82be3cb3",
+    "app/go.mod": "323fe720551205ef03a651c69ba3c16bca3aed89016433ec4144c18f28dbe374",
+    "app/go.sum": "82bc520171fdb6d918f9198834c9693152932b2cde4839052e91ab445ae6ac4d"
+  },
+  "already_passed": {
+    "scoped_normal_race_and_CLI": 39122900592,
+    "pure_contract_and_cost": 39130661652,
+    "contract_plan_sha256": "1740c196e6da230a889550153f40a9604753fb0c3fcbd2190f2a6344d072a8fb"
+  },
+  "resources": {
+    "cpu_cores": 1,
+    "memory_bytes": 805306368,
+    "swap_bytes": 0,
+    "GOMAXPROCS": 1,
+    "GOMEMLIMIT": "512MiB",
+    "runtime_max_seconds": 780,
+    "job_timeout_minutes": 15,
+    "cache": "current remote attempt private; no HOME overwrite",
+    "memory_gate": "high/OOM/kill increments0; max events recorded as whole build-job pressure, not runtime cost; missing generation/counters HOLD"
+  },
+  "artifact": {
+    "name": "hy-pcsproxy4-linux-amd64-${workflow_sha}-${attempt}",
+    "required": [
+      "hysteria",
+      "sources.json",
+      "result.json",
+      "plan.json",
+      "source-manifest.json",
+      "build-final.json",
+      "buildinfo.log",
+      "build-identical-repeat.json",
+      "workflow-provenance.json",
+      "SHA256SUMS"
+    ],
+    "binding": [
+      "repo/ref/workflow commit/run/attempt",
+      "fixed runtime source06ab and all221 original files",
+      "all6 module locks",
+      "Go1.25.6 linuxamd64v1 CGO0 and exactbuildflags/ldflags",
+      "same-input rebuild SHA equals binarySHA",
+      "sources.jsonSHA and codeload archiveSHA+221-file equality",
+      "no generated CLI/main execution"
+    ],
+    "expected_binary_bytes_upper": 33554432,
+    "zip_import_bytes_upper": 50331648,
+    "uncompressed_import_bytes_upper": 67108864,
+    "keep_days": 7
+  },
+  "scope_excluded": [
+    "all tests/benchmarks/contracts reruns",
+    "ACK-height/congestion regressions",
+    "route/HOL/network fixtures",
+    "all generated CLI execution",
+    "production configs/deployment",
+    "local Go builds"
+  ],
+  "files_sha256": {
+    ".github/workflows/pcsproxy4-release.yml": "69148e53cf86538825eec23469781ae1740b07def74a0ea5f91280b97757de46",
+    "tools/pcsproxy4-release/build.py": "470400b378499fa1f4d6d1380f34b6fb01241c70d4439967435c649d3cdbe860",
+    "tools/pcsproxy4-release/launch-remote.sh": "60329cbb91b06f650b1f8f07d5fd6e3e00630cdae882caa04da67da1371e3427",
+    "tools/pcsproxy4-release/README.txt": "1461f5316d2d2895ddeadfc799796bb5ab34d7cc59542565f32ee52fc1cba84c",
+    "tools/pcsproxy4-release/source-manifest.json": "965b0024928ca6b367f9ec709d96ee9a551db16dca18119d7a6ee9de1b5581aa",
+    "tools/pcsproxy4-release/sources.template.json": "fab921df607b46a513fd2ae741c4476ed7743feb16365841795c7c9937559529",
+    "tools/pcs-udp-resolution-context/verify.py": "abc04ed746a91d16006237b8ca6d0e66659a2216c5dd214dc87659023a4cd0ac",
+    "tools/pcs-udp-resolution-context/inputs.json": "8d057c29660adfcd3f3b27920e6e517fb4cef455d8f96d4845e85f406e3690f3",
+    "tools/pcs-udp-resolution-context/actions-lock.json": "4ed4641028fa83531921199e2ddb00c2c36dc613a25d1084022d97b4401a4ced"
+  }
+}

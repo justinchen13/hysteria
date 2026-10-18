@@ -1,0 +1,15 @@
+{
+  "release": "v2.6.4-pcsproxy4",
+  "go": "1.25.6",
+  "build_date": "2026-10-18T13:25:34Z",
+  "quic_go": "v0.54.1-0.20250907230547-eb32f8aec5e2",
+  "source": {
+    "repository": "https://github.com/justinchen13/hysteria",
+    "upstream": "https://github.com/HyNetworks/hysteria",
+    "base_commit": "2146852c483b7e4f68f405023034b8241bfc49c6",
+    "fork_branch": "pcs/udp-resolution-context",
+    "fork_commit": "06ab4eaea8e6c0ad85e0eebeb43d51773af7fcc4",
+    "archive_sha256": null,
+    "archive_url": "https://codeload.github.com/justinchen13/hysteria/tar.gz/06ab4eaea8e6c0ad85e0eebeb43d51773af7fcc4"
+  }
+}
