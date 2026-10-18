@@ -20,6 +20,43 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def consumer_command_name(destination):
+    # Command metadata must never replace the consumer's measured JSON result.
+    return destination.stem+'-command'
+
+
+def output_layout(plan):
+    names={}
+    def reserve(name,role):
+        if name in names:
+            raise ValueError('output path collision: '+name)
+        names[name]=role
+    def command(name):
+        reserve(name+'.json','command_metadata')
+        reserve(name+'.log','command_log')
+    for name in ('result.json','plan.json','source-manifests.json','output-layout.json',
+                 'SHA256SUMS','adjudication.json','workflow-provenance.json',
+                 'actions-lock.json','pcs-udp-context-contract.yml',
+                 'workflow-execution.log','workflow-execution.exit'):
+        reserve(name,'summary_or_provenance')
+    command('go-version')
+    for arm in ('baseline','candidate'):
+        command(arm+'-deps')
+        for module in ('core','extras'):command(arm+'-verify-'+module)
+        for mode in ('normal','race'):
+            command(arm+'-'+mode)
+            reserve(arm+'-'+mode+'-producer.jsonl','producer_corpus')
+        dest=Path(arm+'-normal-consumer.json')
+        reserve(dest.name,'consumer_result');command(consumer_command_name(dest))
+    for index,arm in enumerate(plan['producer_order']):
+        command('producer-cost-'+str(index)+'-'+arm)
+    for case in ('success_cache','cache_fill_then_failed_write'):
+        for index,arm in enumerate(plan['consumer_order']):
+            dest=Path('consumer-cost-'+case+'-'+str(index)+'-'+arm+'.json')
+            reserve(dest.name,'consumer_result');command(consumer_command_name(dest))
+    return names
+
+
 def budgets():
     group=next(line.split(':',2)[2] for line in Path('/proc/self/cgroup').read_text().splitlines() if line.startswith('0::'))
     root=Path('/sys/fs/cgroup'+group)
@@ -63,6 +100,7 @@ def main():
         raise ValueError('existing remote helper changed')
     if shutil.disk_usage(HERE).free<1024**3:
         raise RuntimeError('less than 1GiB remote free space')
+    layout=output_layout(plan)
     before=budgets();args.output.mkdir(parents=True,exist_ok=False)
     spec=importlib.util.spec_from_file_location('reviewed_remote_helper',helper)
     base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)
@@ -70,6 +108,7 @@ def main():
     result={'status':'RUNNING','execution_origin':'REMOTE_CI_PURE_ONLY','started_utc':base.utc(),'resources_before':before,'sources':{},'functional':[],'benchmark_runs':[],'consumer_runs':[], 'plan_sha256':sha(HERE/'plan.json'),'fixture_sha256':plan['fixture_sha256'],'workflow_commit':os.environ.get('GITHUB_SHA'),'run_id':os.environ.get('GITHUB_RUN_ID'),'run_attempt':os.environ.get('GITHUB_RUN_ATTEMPT')}
     shutil.copyfile(HERE/'plan.json',args.output/'plan.json')
     base.save('result.json',result)
+    base.save('output-layout.json',layout)
     try:
         env=dict(os.environ,GOOS='linux',GOARCH='amd64',GOAMD64='v1',CGO_ENABLED='0',GOTOOLCHAIN='local',GOWORK='off',GOMAXPROCS='1',GOMEMLIMIT='512MiB',GOFLAGS='-mod=readonly -buildvcs=false',GOPROXY='https://proxy.golang.org',GOSUMDB='sum.golang.org',GOPRIVATE='',GONOPROXY='',GONOSUMDB='')
         if base.command(['go','version'],args.repository_dir,'go-version',env).read_text().strip()!='go version go1.25.6 linux/amd64':
@@ -97,7 +136,7 @@ def main():
                     consumer=None
                     if mode=='normal':
                         dest=args.output/(arm+'-'+mode+'-consumer.json')
-                        base.command(['python3',str(HERE/'consumer.py'),'--module',str(HERE/('consumer-'+arm+'.py')),'--corpus',str(corpus),'--arm',arm,'--mode','functional','--output',str(dest)],HERE,arm+'-'+mode+'-consumer',offline,timeout=30)
+                        base.command(['python3',str(HERE/'consumer.py'),'--module',str(HERE/('consumer-'+arm+'.py')),'--corpus',str(corpus),'--arm',arm,'--mode','functional','--output',str(dest)],HERE,consumer_command_name(dest),offline,timeout=30)
                         consumer=json.loads(dest.read_text())
                     result['functional'].append(dict(arm=arm,mode=mode,passed=passed,consumer=consumer))
             for index,arm in enumerate(plan['producer_order']):
@@ -106,7 +145,7 @@ def main():
             for case in ('success_cache','cache_fill_then_failed_write'):
                 for index,arm in enumerate(plan['consumer_order']):
                     dest=args.output/('consumer-cost-'+case+'-'+str(index)+'-'+arm+'.json')
-                    base.command(['python3',str(HERE/'consumer.py'),'--module',str(HERE/('consumer-'+arm+'.py')),'--corpus',str(args.output/(arm+'-normal-producer.jsonl')),'--arm',arm,'--mode','cost','--case',case,'--output',str(dest)],HERE,dest.stem,offline,timeout=30)
+                    base.command(['python3',str(HERE/'consumer.py'),'--module',str(HERE/('consumer-'+arm+'.py')),'--corpus',str(args.output/(arm+'-normal-producer.jsonl')),'--arm',arm,'--mode','cost','--case',case,'--output',str(dest)],HERE,consumer_command_name(dest),offline,timeout=30)
                     result['consumer_runs'].append(dict(index=index,arm=arm,case=case,measurement=json.loads(dest.read_text())))
             for arm,root in roots.items():
                 base.module_guard(root)

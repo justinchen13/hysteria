@@ -15,6 +15,23 @@ def main():
     plan=json.loads(args.plan.read_text());gates={};report={'status':'HOLD','gates':gates}
     functions=data['functional'];normal=[x for x in functions if x['mode']=='normal']
     gates['producer_consumer_functional']=data['status']=='PASS_PURE_CONTRACT_MEASURED_COST_PENDING_ADJUDICATION' and {(x['arm'],x['mode']) for x in functions}=={(a,m) for a in ('baseline','candidate') for m in ('normal','race')} and len(functions)==4 and all(x['passed']==['TestPCSUDPContextContract'] for x in functions) and len(normal)==2 and all(x['consumer']['status']=='PASS' and len(x['consumer']['results'])==7 for x in normal)
+    expected_complete={'success_cache','supplied_no_ipv4_error','cache_fill_then_failed_write','dns_timeout','no_address'}
+    expected_overload={'success_cache','cache_fill_then_failed_write'}
+    def coverage_valid(results):
+        complete=[r for r in results if r.get('coverage')=='complete_single_session']
+        overload=[r for r in results if r.get('coverage')=='bounded_overload']
+        return (len(complete)==5 and {r['case'] for r in complete}==expected_complete and
+                len(overload)==2 and {r['case'] for r in overload}==expected_overload and
+                all(r['population']==1 and r['calls']==8 and r['unobserved_calls']==0 and r['retained_sessions']==1 for r in complete) and
+                all(r['population']==128 and 0<r['previous_retained_sessions']<=128 and
+                    r['calls']==8*r['previous_retained_sessions'] and
+                    r['unobserved_calls']==8*(128-r['previous_retained_sessions']) and
+                    r['fresh_counter_baselines']==128-r['previous_retained_sessions'] and
+                    r['initial']['quality'].get('state_byte_limit_evictions',0)==r['fresh_counter_baselines'] and
+                    r['update_quality'].get('state_byte_limit_evictions',0)==128-r['retained_sessions'] for r in overload) and
+                all(r['input_calls']==8*r['population'] and r['calls']+r['unobserved_calls']==r['input_calls'] and
+                    r['same_clock_rejected'] and r['later_poll_replay_deduplicated'] and r['state_bytes']<=262144 for r in results))
+    gates['functional_coverage_contract']=len(normal)==2 and all(coverage_valid(x['consumer']['results']) for x in normal)
     runs=data['benchmark_runs']
     gates['frozen_order']= [x['arm'] for x in runs]==plan['producer_order']
     cases={name for run in runs for name in run['cases']};summary={}

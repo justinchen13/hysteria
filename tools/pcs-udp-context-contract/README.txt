@@ -1,4 +1,6 @@
-PREPARED ONLY — nothing in this directory has been built or run.
+The previous remote attempts and local capacity diagnostic remain failed
+contracts, preserved in the parent's private evidence ledger. This revised
+fixture is prepared for review; no new execution is authorized by this file.
 
 Scope
 The same test-only bridge and fixture are copied into disposable archives of
@@ -20,12 +22,20 @@ Five real pure branch cases, each at one retained connection; success and the
 cached failure also at128. Actual generated JSON feeds both consumers. Verify
 return/payload preservation, classified deltas, exact optional fields, unknown
 values, bounded privacy-safe state, reload, and no replay double count. Context
-eviction at the existing256KiB cap is reported; all128 counter chains must stay.
+eviction at the existing256KiB cap is reported. Five single-session cases still
+require full counters, exact context, reload, and zero replay delta. The two128
+cases are explicitly an overload contract: only identities whose counter chain
+actually survived phase0 may contribute phase1 deltas. Missing identities must
+be reported as fresh baselines, never fabricated historical increments. The
+original1024-call assertion failed correctly:107 retained chains gave856 calls,
+with21 fresh baselines. Whole-entry and optional-context evictions, retained
+counts, state bytes and unobserved calls are retained in every result. No cap
+is enlarged, no input is removed, and no complete128-history claim remains.
 No modification to existing pure regression outcomes or failed import records.
 
 Cost is intentionally small
 Producer ABBAABBA, six pure benchmarks,250ms each, processCPU plus wall and alloc.
-Consumer ABBA for success/error128-state cases, one real advancing write each:
+Consumer ABBA for success/error128-input cases, one real advancing write each:
 only8 measured commits, plus their setup baselines. No sustained IO pressure.
 JSON bytes are measured from actual serialized records. Budget arithmetic uses
 the existing producer maximum64 records/sec and consumer10s cadence, not a claim

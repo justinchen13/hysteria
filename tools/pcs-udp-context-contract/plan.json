@@ -12,13 +12,13 @@
   "fixture_sha256": {
     "core_bridge.go": "1aa4a41b401f869e549469a3aa14aa227bd511f1e36eedc3948237b2d8aaf709",
     "contract_test.go": "ed66e014495d1c3540bdf798470e3a56bae4a210d67d67c9ea913e7a262e849b",
-    "consumer.py": "2fd241823ff502d9c77c5ca996d81773442b913bc2dc6bc80931d0c360888659",
-    "run.py": "8dfa2456a1d9db48b993306cf56820965721e290720b7c5d6a284b81adaa33f9",
-    "adjudicate.py": "c7ee2e07f55562ece96eb6a71ba7ee741348e8fb7d5fd8de32d0785fee25217b",
+    "consumer.py": "ae25fdc5c69e282dfbb09dac8335f15d00a96f65e7851db548436fa97d95cb91",
+    "run.py": "7ebd62bc7cfb4b20abf202d7c29d1874fcc6379f62024d5bc8abcfd89c66d269",
+    "adjudicate.py": "d5dcdd83dd92e6f60e5c433e3ae029ef98a7bcc093583ac10a9c90ef14b10e87",
     "launch-remote.sh": "f9eb952437a95aa952434d593c2eeb5ded24addf77e695a3566759227e3dabac",
     "consumer-baseline.py": "e2ef8f8dfd027ecc93f78c168698e1fed10d49d52ab9dfe3ab8f1a3b9c8c5f20",
     "consumer-candidate.py": "d9e3c30215ef5a7a6c7749e8c71fd9437a165ea2d7aadaf03c033c86d2845214",
-    "README.txt": "0140ab63ba0c6fe95c900eb9f57d402cfa94ca5c5e8ef49c0c118b3a971ef0d0"
+    "README.txt": "6f9ffb0cce9e01a8ae9549a2d132e7e06fdf6f9588f88d1b05d890b3d9b9f460"
   },
   "producer_order": [
     "baseline",
@@ -76,12 +76,19 @@
   ],
   "limits": [
     "Pure changed-logic and evidence-persistence chain only; no OS successful UDP send, actual DNS, TLS/QUIC transport or full monitor API/ss loop.",
-    "Consumer128 state may evict optional contexts at existing256KiB limit; no complete per-error history claim.",
+    "Consumer128 input may evict optional contexts and entire oldest entries at existing256KiB cap; omissions and fresh baselines are explicit. No complete per-error or128-session counter history claim.",
     "This does not prove or repair IPv6 egress, ACK silence, BBR behavior or public video speed.",
     "No workflow trigger, local Go build, load, deployment or prior rejected action has run.",
     "Existing v1 import FAIL remains; v2 artifact validation does not erase it."
   ],
   "prepared_utc": "2026-10-18T11:51:16.827447+00:00",
   "consumer_functional_passes": 2,
-  "consumer_io_scope": "Normal producer corpus only; do not repeat consumer persistence for race corpus.8 measured cost updates,8 setup baseline updates, plus the single normal contract/restart/replay chain per arm/case."
+  "consumer_io_scope": "Normal producer corpus only; do not repeat consumer persistence for race corpus.8 measured cost updates,8 setup baseline updates, plus the single normal contract/restart/replay chain per arm/case.",
+  "functional_contract_revision": "single_complete_and_128_bounded_overload_v1",
+  "functional_coverage": {
+    "single_session": "All five branch cases require full counters, exact error/outbound context, restart and duplicate replay rejection.",
+    "input_128": "All128 real producer records unchanged; only phase0 persistent counter chains may produce phase1 increments. Other records must report first baselines. Preserve explicit evictions, retained count/bytes and unobserved input calls. Existing byte/count limits remain.",
+    "replay": "Original same-clock call remains a required negative; later poll replays unchanged producer records, must report duplicate records and no UDP increments.",
+    "cost": "All original128 inputs, calls, budgets and measured commit counts unchanged; actual retention is bounded, not promised128."
+  }
 }
