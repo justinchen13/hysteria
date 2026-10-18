@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/apernet/quic-go"
@@ -51,6 +52,8 @@ type udpSessionEntry struct {
 	conn     UDPConn
 	connLock sync.Mutex
 	closed   bool
+	// Evidence-only marker; e.closed remains protected by connLock.
+	evidenceClosing atomic.Bool
 }
 
 func newUDPSessionEntry(
@@ -85,6 +88,9 @@ func (e *udpSessionEntry) CloseWithErr(err error) {
 	}
 
 	e.closed = true
+	if e.Evidence != nil {
+		e.evidenceClosing.Store(true)
+	}
 	if e.conn != nil {
 		_ = e.conn.Close()
 	}
@@ -111,6 +117,9 @@ func (e *udpSessionEntry) Feed(msg *protocol.UDPMessage) (int, error) {
 	if e.conn == nil {
 		op := e.Evidence.begin(udpPhaseInit, len(dfMsg.Data))
 		err := e.initConn(dfMsg)
+		if err != nil && e.Evidence != nil {
+			e.Evidence.recordError(udpPhaseInit, err, len(dfMsg.Data), 0, op, e.evidenceClosing.Load())
+		}
 		op.complete(0, err)
 		if err != nil {
 			return 0, err
@@ -124,7 +133,6 @@ func (e *udpSessionEntry) Feed(msg *protocol.UDPMessage) (int, error) {
 
 	op := e.Evidence.begin(udpPhaseTargetWrite, len(dfMsg.Data))
 	n, err := e.conn.WriteTo(dfMsg.Data, addr)
-	op.complete(n, err)
 	if u := e.Evidence; u != nil {
 		u.targetWriteCalls.Add(1)
 		if n > 0 {
@@ -132,8 +140,10 @@ func (e *udpSessionEntry) Feed(msg *protocol.UDPMessage) (int, error) {
 		}
 		if err != nil {
 			u.targetWriteErrors.Add(1)
+			u.recordError(udpPhaseTargetWrite, err, len(dfMsg.Data), n, op, e.evidenceClosing.Load())
 		}
 	}
+	op.complete(n, err)
 	return n, err
 }
 

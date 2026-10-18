@@ -67,6 +67,18 @@ type noAddressError struct {
 	IPv6 bool
 }
 
+// UDPErrorClass is a fixed, address-free diagnostic hint. It does not change
+// error identity, Error() text, Unwrap(), resolution or forwarding behavior.
+func (e noAddressError) UDPErrorClass() string {
+	if e.IPv4 && !e.IPv6 {
+		return "no_ipv4"
+	}
+	if e.IPv6 && !e.IPv4 {
+		return "no_ipv6"
+	}
+	return "no_address"
+}
+
 func (e noAddressError) Error() string {
 	if e.IPv4 && e.IPv6 {
 		return "no IPv4 or IPv6 address available"
@@ -81,6 +93,8 @@ func (e noAddressError) Error() string {
 
 type invalidOutboundModeError struct{}
 
+func (e invalidOutboundModeError) UDPErrorClass() string { return "outbound_mode_invalid" }
+
 func (e invalidOutboundModeError) Error() string {
 	return "invalid outbound mode"
 }
@@ -88,6 +102,8 @@ func (e invalidOutboundModeError) Error() string {
 type resolveError struct {
 	Err error
 }
+
+func (e resolveError) UDPErrorClass() string { return "dns_other" }
 
 func (e resolveError) Error() string {
 	if e.Err == nil {
