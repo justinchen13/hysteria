@@ -4,6 +4,37 @@ import argparse
 import json
 from pathlib import Path
 import statistics
+import re
+import phase_cgroup
+
+
+def staged_resource_contract(data):
+    reports=data.get('phase_resources',[])
+    expected=[('phase-%02d-%s'%(i,name),kind) for i,(name,kind) in enumerate(phase_cgroup.expected_phases())]
+    return (data.get('resource_contract')=='staged_v6_build_only_max_exception' and
+            [(r.get('name'),r.get('kind')) for r in reports]==expected and
+            phase_cgroup.aggregate_gate(data.get('resources_before'),data.get('resources_after'),reports))
+
+
+def binary_contract(data,plan,artifact):
+    try:
+        records=data['test_binaries']
+        if artifact!=records or set(records)!={'baseline','candidate'}:
+            return False
+        for arm in ('baseline','candidate'):
+            if set(records[arm])!={'normal','race'}:
+                return False
+            for mode in ('normal','race'):
+                row=records[arm][mode]
+                if (row['source_commit']!=plan['sources'][arm] or row['mode']!=mode or
+                        row['toolchain']!='go1.25.6' or not re.fullmatch('[0-9a-f]{64}',row['sha256'])):
+                    return False
+                functional=[f for f in data['functional'] if f['arm']==arm and f['mode']==mode]
+                if len(functional)!=1 or functional[0]['binary_sha256']!=row['sha256']:
+                    return False
+        return all(r['binary_sha256']==records[r['arm']]['normal']['sha256'] for r in data['benchmark_runs'])
+    except (KeyError,TypeError,ValueError):
+        return False
 
 
 def main():
@@ -73,9 +104,25 @@ def main():
     report['modeled_incremental_cpu_core']=10000*success_extra+1000*error_extra+64*snapshot_extra+consumer_extra/10
     report['model_scope']='Conservative stated-rate arithmetic only: 10k successful pure Feed/s, 1k errors/s, existing maximum64 emitted records/s, one128-member state update/10s. Not actual UDP/TLS/server throughput or a deployment safety proof.'
     gates['modeled_incremental_budget']=report['modeled_incremental_cpu_core']<=.01
-    before=data['resources_before'];after=data['resources_after']
-    parse=lambda s:{key:int(value) for key,value in (line.split() for line in s.splitlines())}
-    gates['memory_budget']=all(parse(after['memory.events']).get(k,0)-parse(before['memory.events']).get(k,0)==0 for k in ('high','max','oom','oom_kill'))
+    gates['staged_resource_budget']=staged_resource_contract(data)
+    try:
+        binary_artifact=json.loads((args.directory/'test-binaries.json').read_text())
+    except (OSError,ValueError):
+        binary_artifact=None
+    gates['fixed_functionally_qualified_cost_binary']=binary_contract(data,plan,binary_artifact)
+    report['resource_contract']='New run6 staged contract. Run5 whole-unit memory.max HOLD remains unchanged. Only build-phase max events may be attributed as compilation pressure; all other phases and the corresponding full parent windows require zero high/max/OOM/kill deltas. Missing counters/generation/limits fail closed.'
+    report['resource_peak_semantics']='Every memory.peak is cumulative for its own cgroup generation. Parent peak includes prior build/cache and is not a cost-specific peak. Fresh worker peak covers only that worker, but cannot replace parent-window event checks.'
+    report['phase_resource_summary']=[]
+    for phase in data.get('phase_resources',[]):
+        item={'name':phase.get('name'),'kind':phase.get('kind'),'pass':phase_cgroup.phase_gate(phase)}
+        for scope in ('parent','worker'):
+            try:
+                item[scope+'_memory_events_delta']=phase_cgroup.event_delta(phase[scope+'_before'],phase[scope+'_after'])
+                item[scope+'_memory_peak_cumulative_bytes']=int(phase[scope+'_after']['memory.peak'])
+            except (KeyError,TypeError,ValueError):
+                item[scope+'_memory_events_delta']=None
+                item[scope+'_memory_peak_cumulative_bytes']=None
+        report['phase_resource_summary'].append(item)
     if all(gates.values()):report['status']='PURE_DIAGNOSTIC_CONTRACT_AND_BUDGET_PASS'
     report['failed_gates']=[k for k,v in gates.items() if not v]
     report['release_scope']='No production changes or network/TLS/QUIC validation occurred. Root coordinates formal identity and monitored single-service deployment separately.'

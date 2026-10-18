@@ -18,6 +18,7 @@ printf 'remote_go_cache_root=%s; cache_scope=current_attempt_only\n' "$cache_roo
 # processes, never another job/container. No CPU-quota relaxation or retries.
 sudo systemd-run --unit="$unit" --wait --collect --pipe \
   -p CPUQuota=100% -p MemoryMax=768M -p MemorySwapMax=0 \
+  -p Delegate=yes \
   -p RuntimeMaxSec=780s -p TimeoutStopSec=5s -p KillMode=control-group \
   -p "WorkingDirectory=$fixture_dir" \
   /usr/bin/env "PATH=$PATH" "GITHUB_ACTIONS=true" \

@@ -53,3 +53,43 @@ Any functional, privacy, source/hash/module, memory or numerical budget failure
 stops and stays FAIL/HOLD. No automatic retry/threshold change. A passing result
 means only PURE_DIAGNOSTIC_CONTRACT_AND_BUDGET_PASS. Root owns final release
 identity and any monitored production switch; existing image/config is rollback.
+
+Run6 staged resource contract (prepared, not executed)
+Run5 completed all functional and numeric cost gates, but whole-unit
+memory.events.max increased403. Its HOLD is permanent; the missing phase
+snapshots cannot identify which commands caused those events.
+
+The new runner uses one aggregate1CPU/768MiB/Swap0 delegated service. Its
+single-threaded controller moves into a96MiB control child before enabling cpu
+and memory controllers, then runs serial fresh workers under the same parent.
+Each worker has1CPU/768MiB/Swap0; these are nested limits, not extra budgets.
+No concurrent build or consumer worker exists. The parent's original path is
+retained explicitly, including initialization failures after controller move.
+
+Prepare, four normal/race builds, four functional runs, and one cost phase each
+save before/after parent+worker snapshots, dev/inode generation, monotonic time,
+limits, CPU counters, memory.current/peak/stat/events and cleanup outcome.
+Only explicitly attributed build-phase memory.max increments are allowed as
+compilation pressure. Build high/OOM/kill/timeout fails. Prepare, functional
+and cost require zero high/max/OOM/kill in both fresh worker and full aggregate
+parent window. Outside-phase events also fail. Missing/generation-inconsistent
+data fails closed. Parent memory.peak is cumulative across earlier phases and
+cache; it is never described as a cost-only peak. Fresh-worker peak does not
+replace parent-window checks.
+
+Each fixed source produces normal and race .test executables with go test -c.
+The exact normal/race binary SHA executes the unchanged named contract through
+go tool test2json. Cost directly executes the same functionally qualified normal
+.test SHA with the unchanged ABBAABBA order,250ms benchmark duration, and cases.
+No Go build occurs in functional or cost workers. Original128 consumer inputs,
+all allocation/CPU/JSON/state thresholds and total resource ceilings remain.
+Test binaries are disposable and their SHA/build command/source identity remain
+in the artifact. The explicit artifact namespace grows from83 to112 files to
+include phase reports, returns, build command logs and the binary manifest.
+
+test_staged.py is a small pure mock contract: no cgroup mutation, subprocess,
+fork, Go or network. It checks strict resource attribution, generation/window
+boundaries, missing snapshots, path ownership, payload write failure, output
+uniqueness and fixed functional-to-cost binary identity. It does not emulate
+kernel accounting or certify real remote execution; only a separately reviewed
+sixth run can do that. It never changes or re-adjudicates run5.

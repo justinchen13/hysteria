@@ -13,12 +13,14 @@
     "core_bridge.go": "1aa4a41b401f869e549469a3aa14aa227bd511f1e36eedc3948237b2d8aaf709",
     "contract_test.go": "ed66e014495d1c3540bdf798470e3a56bae4a210d67d67c9ea913e7a262e849b",
     "consumer.py": "ae25fdc5c69e282dfbb09dac8335f15d00a96f65e7851db548436fa97d95cb91",
-    "run.py": "7ebd62bc7cfb4b20abf202d7c29d1874fcc6379f62024d5bc8abcfd89c66d269",
-    "adjudicate.py": "d5dcdd83dd92e6f60e5c433e3ae029ef98a7bcc093583ac10a9c90ef14b10e87",
-    "launch-remote.sh": "f9eb952437a95aa952434d593c2eeb5ded24addf77e695a3566759227e3dabac",
+    "run.py": "9e454c4926a237745bdd763b57bf0bdb65a551e53db4d50aab97cd2e537b816b",
+    "adjudicate.py": "d9c8e5645680ff9f6b4be2269bbfd97678a232b42a51eadf78fc842de51f4920",
+    "launch-remote.sh": "5b558fc07c3db0d9069bd287d832e0f4a1fb00a596be4b224ee2f8d9b88333e6",
     "consumer-baseline.py": "e2ef8f8dfd027ecc93f78c168698e1fed10d49d52ab9dfe3ab8f1a3b9c8c5f20",
     "consumer-candidate.py": "d9e3c30215ef5a7a6c7749e8c71fd9437a165ea2d7aadaf03c033c86d2845214",
-    "README.txt": "6f9ffb0cce9e01a8ae9549a2d132e7e06fdf6f9588f88d1b05d890b3d9b9f460"
+    "README.txt": "34caba4dde5815528a4f5132901c322f2fc3e5e7cf8e157f18085f9c382ad5cd",
+    "phase_cgroup.py": "58363514d6b90d158ee543671899f0aef47aeb55a1ae58c99993e7476c557fc3",
+    "test_staged.py": "720303efe3815978c446854e3c34e89dbc6c4e5083f6444c5bfc1060677160b8"
   },
   "producer_order": [
     "baseline",
@@ -71,17 +73,17 @@
   },
   "rollback_conditions": [
     "Any privacy, changed protocol return/payload, error-class/delta loss, unknown-value invention, state bound/restart/replay failure: HOLD, do not install.",
-    "Any missing source/module/hash/input, timeout, memory event max/high/OOM, CPU/JSON/state budget failure: retain failedattempt, no retry/relaxation.",
+    "Any missing source/module/hash/input, timeout, resource-contract or CPU/JSON/state budget failure: retain failed attempt, no retry/relaxation. Only explicitly attributed build max events are compilation-pressure exceptions in this new v6 contract; run5 remains HOLD.",
     "A later production switch, only by root, retains current206921 image/config; consumer is backward-compatible. New errors/collector unknown or gap above baseline trigger root-reviewed rollback; no other proxy restart."
   ],
   "limits": [
     "Pure changed-logic and evidence-persistence chain only; no OS successful UDP send, actual DNS, TLS/QUIC transport or full monitor API/ss loop.",
     "Consumer128 input may evict optional contexts and entire oldest entries at existing256KiB cap; omissions and fresh baselines are explicit. No complete per-error or128-session counter history claim.",
     "This does not prove or repair IPv6 egress, ACK silence, BBR behavior or public video speed.",
-    "No workflow trigger, local Go build, load, deployment or prior rejected action has run.",
-    "Existing v1 import FAIL remains; v2 artifact validation does not erase it."
+    "Existing v1 import FAIL remains; v2 artifact validation does not erase it.",
+    "Prior pure remote contracts ran and remain recorded. This v6 draft has not run; it does not include any previously rejected ACK-height or route action."
   ],
-  "prepared_utc": "2026-10-18T11:51:16.827447+00:00",
+  "prepared_utc": "2026-10-18T13:08:48.959564+00:00",
   "consumer_functional_passes": 2,
   "consumer_io_scope": "Normal producer corpus only; do not repeat consumer persistence for race corpus.8 measured cost updates,8 setup baseline updates, plus the single normal contract/restart/replay chain per arm/case.",
   "functional_contract_revision": "single_complete_and_128_bounded_overload_v1",
@@ -90,5 +92,36 @@
     "input_128": "All128 real producer records unchanged; only phase0 persistent counter chains may produce phase1 increments. Other records must report first baselines. Preserve explicit evictions, retained count/bytes and unobserved input calls. Existing byte/count limits remain.",
     "replay": "Original same-clock call remains a required negative; later poll replays unchanged producer records, must report duplicate records and no UDP increments.",
     "cost": "All original128 inputs, calls, budgets and measured commit counts unchanged; actual retention is bounded, not promised128."
+  },
+  "resource_contract_revision": "staged_v6_build_only_max_exception",
+  "resource_contract": {
+    "prior_result": "Run39128053608 whole-unit memory.max+403 remains HOLD permanently; no phase localization existed.",
+    "aggregate": "One delegated service, exact1CPU/768MiB/Swap0; controller96MiB plus serial fresh workers share the parent cap. Fixed aggregate path+dev/inode, never control-child substitution.",
+    "phases": [
+      "prepare",
+      "build-baseline-normal",
+      "build-baseline-race",
+      "build-candidate-normal",
+      "build-candidate-race",
+      "functional-baseline-normal",
+      "functional-baseline-race",
+      "functional-candidate-normal",
+      "functional-candidate-race",
+      "cost"
+    ],
+    "build": "Only memory.events.max increments explicitly attributed to build windows may be separately accepted as compilation pressure. No high/OOM/kill/timeout; complete source and binary provenance required.",
+    "non_build": "Prepare, functional and cost require zero high/max/OOM/kill deltas for both worker and corresponding aggregate-parent full window. Missing, reset/reused generation, overlap, unattributed outside-phase events or cleanup failure => HOLD.",
+    "peak_semantics": "memory.peak is cumulative per cgroup generation; aggregate parent peak includes prior build/cache and is not cost-specific. Fresh worker peak does not replace parent events checks.",
+    "same_binary": "go test -c produces fixed normal/race .test SHA. Functional uses go tool test2json; cost directly executes the same functionally verified normal .test SHA. No compilation in functional/cost.",
+    "unchanged": "Same1CPU/768MiB/Swap0/GOMEMLIMIT512MiB; no GOGC change; same source,module locks,pure cases,ABBAABBA,250ms,all128 inputs,consumer commits and numeric budgets.",
+    "phase_hard_seconds": {
+      "prepare": 180,
+      "each_build": 250,
+      "each_functional": 100,
+      "cost": 180
+    },
+    "overall_hard_seconds": 780,
+    "output_namespace_members": 112,
+    "new_local_mock_scope": "11pure tests PASS once2026-10-18T13:12:10.132142\u201313:12:13.175800UTC under.1CPU96MiB/Swap0; no cgroup writes/fork/subprocess/Go/network. All localmemory eventincrements0; no runtime resource-contract relaxation."
   }
 }
