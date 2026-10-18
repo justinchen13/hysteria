@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "status": "ROOT_REVIEWED_REMOTE_ONLY",
+  "repository": "justinchen13/hysteria",
+  "ref": "refs/heads/pcs/udp-resolution-context",
+  "sources": {
+    "baseline": "206921c72fb2d8f3d53b6f60507daff345a617ee",
+    "candidate": "06ab4eaea8e6c0ad85e0eebeb43d51773af7fcc4"
+  },
+  "helper_path": "tools/pcs-udp-resolution-context/verify.py",
+  "helper_sha256": "abc04ed746a91d16006237b8ca6d0e66659a2216c5dd214dc87659023a4cd0ac",
+  "fixture_sha256": {
+    "core_bridge.go": "1aa4a41b401f869e549469a3aa14aa227bd511f1e36eedc3948237b2d8aaf709",
+    "contract_test.go": "ed66e014495d1c3540bdf798470e3a56bae4a210d67d67c9ea913e7a262e849b",
+    "consumer.py": "4a4128e81799786c1cd448030015c46e98845c2de7ca46a426d0eb3920c0a9ac",
+    "run.py": "8dfa2456a1d9db48b993306cf56820965721e290720b7c5d6a284b81adaa33f9",
+    "adjudicate.py": "c7ee2e07f55562ece96eb6a71ba7ee741348e8fb7d5fd8de32d0785fee25217b",
+    "launch-remote.sh": "4590974f940c12467b146adc098def1b9d9b3ea5a53c763ae708900d4f0701e4",
+    "consumer-baseline.py": "e2ef8f8dfd027ecc93f78c168698e1fed10d49d52ab9dfe3ab8f1a3b9c8c5f20",
+    "consumer-candidate.py": "d9e3c30215ef5a7a6c7749e8c71fd9437a165ea2d7aadaf03c033c86d2845214",
+    "README.txt": "0140ab63ba0c6fe95c900eb9f57d402cfa94ca5c5e8ef49c0c118b3a971ef0d0"
+  },
+  "producer_order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline",
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "consumer_order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "budgets": {
+    "remote_only": true,
+    "cpu_cores_max": 1,
+    "memory_bytes_max": 805306368,
+    "swap_bytes_max": 0,
+    "go_heap_soft_limit_bytes": 536870912,
+    "consumer_process_address_space_bytes_max": 100663296,
+    "remote_hard_seconds": 780,
+    "workflow_timeout_minutes": 15,
+    "producer_min_cpu_seconds_per_case": 0.05,
+    "success_extra_allocations": 0,
+    "success_extra_bytes_per_op": 0,
+    "success_cpu_rule": "candidate <= baseline*1.20 OR extra <=100ns; report both, do not call nanosecond noise a speed benefit",
+    "error_extra_cpu_ns_per_op_max": 5000,
+    "error_extra_allocations_per_op_max": 16,
+    "error_extra_bytes_per_op_max": 1024,
+    "snapshot_extra_cpu_ns_per_op_max": 20000,
+    "extra_json_bytes_per_record_max": 512,
+    "consumer_population": 128,
+    "consumer_measured_commits_total": 8,
+    "consumer_cpu_seconds_per_update_max": 0.05,
+    "consumer_extra_cpu_seconds_per_update_max": 0.01,
+    "consumer_wall_seconds_per_update_max": 0.5,
+    "consumer_state_bytes_max": 262144,
+    "modeled_incremental_core_max": 0.01,
+    "rate_model": {
+      "successful_pure_datagrams_per_second": 10000,
+      "error_datagrams_per_second": 1000,
+      "emitted_records_per_second": 64,
+      "state_updates_per_second": 0.1
+    },
+    "budget_rationale": "Additional error work allowed a bounded absolute cost because current error frequency is2/30min and baseline some branches are nanoseconds. Error model1000/s is conservative, not observed traffic. Producer maximum64 records/s and128 state cap retain real existing bounds. Whole-model1%core cap is an incremental arithmetic budget, not measured actual proxy capacity."
+  },
+  "rollback_conditions": [
+    "Any privacy, changed protocol return/payload, error-class/delta loss, unknown-value invention, state bound/restart/replay failure: HOLD, do not install.",
+    "Any missing source/module/hash/input, timeout, memory event max/high/OOM, CPU/JSON/state budget failure: retain failedattempt, no retry/relaxation.",
+    "A later production switch, only by root, retains current206921 image/config; consumer is backward-compatible. New errors/collector unknown or gap above baseline trigger root-reviewed rollback; no other proxy restart."
+  ],
+  "limits": [
+    "Pure changed-logic and evidence-persistence chain only; no OS successful UDP send, actual DNS, TLS/QUIC transport or full monitor API/ss loop.",
+    "Consumer128 state may evict optional contexts at existing256KiB limit; no complete per-error history claim.",
+    "This does not prove or repair IPv6 egress, ACK silence, BBR behavior or public video speed.",
+    "No workflow trigger, local Go build, load, deployment or prior rejected action has run.",
+    "Existing v1 import FAIL remains; v2 artifact validation does not erase it."
+  ],
+  "prepared_utc": "2026-10-18T11:51:16.827447+00:00",
+  "consumer_functional_passes": 2,
+  "consumer_io_scope": "Normal producer corpus only; do not repeat consumer persistence for race corpus.8 measured cost updates,8 setup baseline updates, plus the single normal contract/restart/replay chain per arm/case."
+}

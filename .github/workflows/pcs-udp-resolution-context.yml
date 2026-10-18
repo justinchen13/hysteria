@@ -3,6 +3,11 @@ name: Verify bounded UDP resolution error context
 on:
   push:
     branches: [pcs/udp-resolution-context]
+    paths:
+      - 'core/**'
+      - 'extras/**'
+      - 'app/**'
+      - 'tools/pcs-udp-resolution-context/**'
 
 permissions:
   contents: read

@@ -1,0 +1,120 @@
+name: Verify pure UDP error context producer-consumer contract
+
+on:
+  push:
+    branches: [pcs/udp-resolution-context]
+    paths:
+      - '.github/workflows/pcs-udp-context-contract.yml'
+      - 'tools/pcs-udp-context-contract/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pcs-udp-context-contract
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    if: github.repository == 'justinchen13/hysteria' && github.ref == 'refs/heads/pcs/udp-resolution-context'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CGO_ENABLED: '0'
+      GOOS: linux
+      GOARCH: amd64
+      GOAMD64: v1
+      GOTOOLCHAIN: local
+      GOWORK: 'off'
+      GOMAXPROCS: '1'
+      GOMEMLIMIT: 512MiB
+    steps:
+      - name: Check out dedicated diagnostic branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select exact Go toolchain
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.25.6'
+          architecture: x64
+          check-latest: false
+          cache: false
+      - name: Run only the frozen pure contract and diagnostic budgets
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$GITHUB_WORKSPACE/dist/pcs-udp-context-contract"
+          log="$RUNNER_TEMP/pcs-udp-context-contract-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT.log"
+          # The restricted unit runs as root while checkout belongs to runner.
+          # Trust exactly this ephemeral checkout for git archive, not all paths.
+          sudo git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          # The reviewed launcher uses a root-owned restricted systemd unit.
+          # Run its final offline adjudicator as the same user; only explicit
+          # non-secret workflow identity and the exact toolchain PATH pass in.
+          set +e
+          sudo /usr/bin/env "PATH=$PATH" "GITHUB_ACTIONS=true" \
+            "GITHUB_REPOSITORY=$GITHUB_REPOSITORY" "GITHUB_REF=$GITHUB_REF" \
+            "GITHUB_SHA=$GITHUB_SHA" "GITHUB_RUN_ID=$GITHUB_RUN_ID" \
+            "GITHUB_RUN_ATTEMPT=$GITHUB_RUN_ATTEMPT" \
+            bash tools/pcs-udp-context-contract/launch-remote.sh "$GITHUB_WORKSPACE" "$output" \
+            >"$log" 2>&1
+          status=$?
+          if test "$status" -eq 0; then
+            sudo python3 - "$output/adjudication.json" <<'PY'
+          import json, pathlib, sys
+          value=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          print('diagnostic_contract_status='+str(value.get('status')))
+          raise SystemExit(0 if value.get('status')=='PURE_DIAGNOSTIC_CONTRACT_AND_BUDGET_PASS' else 1)
+          PY
+            status=$?
+          fi
+          printf '%s\n' "$status" >"$RUNNER_TEMP/pcs-udp-context-contract-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT.exit"
+          exit "$status"
+      - name: Preserve owned output and failure log without rerunning
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$GITHUB_WORKSPACE/dist/pcs-udp-context-contract"
+          # Only this fixed synthetic-result tree is made readable for upload.
+          # No system/container/source/proxy paths are modified.
+          sudo mkdir -p "$output"
+          test "$(realpath "$output")" = "$GITHUB_WORKSPACE/dist/pcs-udp-context-contract"
+          test -z "$(sudo find "$output" -type l -print -quit)"
+          sudo chown -R --no-dereference "$(id -u):$(id -g)" "$output"
+          for suffix in log exit; do
+            file="$RUNNER_TEMP/pcs-udp-context-contract-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT.$suffix"
+            if test -f "$file"; then cp "$file" "$output/workflow-execution.$suffix"; fi
+          done
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root=pathlib.Path(os.environ['GITHUB_WORKSPACE'])
+          out=root/'dist/pcs-udp-context-contract'
+          names=['.github/workflows/pcs-udp-context-contract.yml',
+                 'tools/pcs-udp-resolution-context/actions-lock.json']
+          values={'execution_origin':'REMOTE_CI_PURE_ONLY',
+                  'repository':os.environ['GITHUB_REPOSITORY'],
+                  'ref':os.environ['GITHUB_REF'],'commit':os.environ['GITHUB_SHA'],
+                  'run_id':os.environ['GITHUB_RUN_ID'],'attempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                  'file_sha256':{}}
+          for name in names:
+              path=root/name
+              if path.is_file():
+                  data=path.read_bytes(); values['file_sha256'][name]=hashlib.sha256(data).hexdigest()
+                  (out/path.name).write_bytes(data)
+          (out/'workflow-provenance.json').write_text(json.dumps(values,indent=2)+'\n')
+          (out/'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n'
+              for p in sorted(out.iterdir()) if p.is_file() and p.name!='SHA256SUMS'))
+          PY
+      - name: Preserve results including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: hy-udp-context-contract-${{ github.sha }}-${{ github.run_attempt }}
+          path: dist/pcs-udp-context-contract/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 6
+          include-hidden-files: false
