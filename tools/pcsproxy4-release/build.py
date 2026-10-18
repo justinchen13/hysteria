@@ -59,7 +59,11 @@ def archive_check(destination,plan,expected_files):
             if len(path.parts)<2 or path.parts[1] not in ('core','extras','app'):continue
             if member.isdir():continue
             name=str(PurePosixPath(*path.parts[1:]))
-            if not member.isfile() or member.size>8*1024**2 or name in observed:raise ValueError('source archive member type/size/duplicate')
+            # This fixed source includes one 9,640,091-byte GeoIP database.
+            fixed_geoip=name=='extras/outbounds/acl/v2geo/geoip.dat'
+            if fixed_geoip and member.size!=9640091:raise ValueError('fixed GeoIP source size differs')
+            limit=9640091 if fixed_geoip else 8*1024**2
+            if not member.isfile() or member.size>limit or name in observed:raise ValueError('source archive member type/size/duplicate')
             observed[name]=hashlib.sha256(archive.extractfile(member).read()).hexdigest()
     if observed!=expected_files:raise ValueError('codeload runtime source differs from verified build tree')
     return dict(url=url,sha256=sha(destination),bytes=count,runtime_files_verified=len(observed))

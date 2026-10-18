@@ -85,7 +85,7 @@
   ],
   "files_sha256": {
     ".github/workflows/pcsproxy4-release.yml": "69148e53cf86538825eec23469781ae1740b07def74a0ea5f91280b97757de46",
-    "tools/pcsproxy4-release/build.py": "470400b378499fa1f4d6d1380f34b6fb01241c70d4439967435c649d3cdbe860",
+    "tools/pcsproxy4-release/build.py": "cb2db96527153efc420d47f8610f29c03d205e61e484e42b6dd8708427785efb",
     "tools/pcsproxy4-release/launch-remote.sh": "60329cbb91b06f650b1f8f07d5fd6e3e00630cdae882caa04da67da1371e3427",
     "tools/pcsproxy4-release/README.txt": "1461f5316d2d2895ddeadfc799796bb5ab34d7cc59542565f32ee52fc1cba84c",
     "tools/pcsproxy4-release/source-manifest.json": "965b0024928ca6b367f9ec709d96ee9a551db16dca18119d7a6ee9de1b5581aa",
