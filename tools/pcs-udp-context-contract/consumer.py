@@ -53,8 +53,8 @@ def batch(module, rows):
     return [module.sanitize(rows[index]) for index in sorted(rows)]
 
 
-def record(module, state, records):
-    now = max(row['capture_unix'] for row in records) + .005
+def record(module, state, records, *, collector_now=None):
+    now = max(row['capture_unix'] for row in records) + .005 if collector_now is None else collector_now
     result = state.record(EPOCH, records, {}, now)
     if state.error or result.get('availability') != 'h1_observed':
         raise ValueError('actual persistence failure')
@@ -117,11 +117,29 @@ def functional(module, groups, arm):
             encoded = state.path.read_bytes()
             if any(value in encoded for value in (b'PRIVATE-CANARY', b'synthetic.invalid', b'2001:db8')):
                 raise ValueError('privacy violation')
-            repeated = record(module, state, batch(module, phases[1]))
+            # The producer record is replayed unchanged at a later collector
+            # poll, not at the prior poll's identical clock value. Retain that
+            # invalid same-clock invocation as an explicit negative control.
+            replay_records = batch(module, phases[1])
+            last_poll = state.state['last_poll_unix']
+            previous_state = json.dumps(state.state, sort_keys=True)
+            try:
+                state.update(EPOCH, replay_records, {}, last_poll)
+            except ValueError as error:
+                if str(error) != 'non-increasing collector clock':
+                    raise
+            else:
+                raise ValueError('same-clock negative control unexpectedly accepted')
+            if json.dumps(state.state, sort_keys=True) != previous_state or state.path.read_bytes() != encoded:
+                raise ValueError('same-clock rejection changed persistent state')
+            repeated = record(module, state, replay_records, collector_now=last_poll+.005)
+            if state.state['last_poll_unix'] <= last_poll:
+                raise ValueError('replay collector clock did not advance')
             if any(value for key,value in repeated['batch']['observed_counter_deltas'].items() if key.startswith('sessions.udp.')):
                 raise ValueError('restart replay double counted')
             outcomes.append(dict(case=case,population=population,calls=8*population,
                                  errors=expected_errors,retained_contexts=len(contexts),
+                                 same_clock_rejected=True,later_poll_replay_deduplicated=True,
                                  state_bytes=len(encoded),quality=dict(state.state['quality'])))
     return outcomes
 

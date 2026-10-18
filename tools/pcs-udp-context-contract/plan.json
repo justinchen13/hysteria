@@ -12,7 +12,7 @@
   "fixture_sha256": {
     "core_bridge.go": "1aa4a41b401f869e549469a3aa14aa227bd511f1e36eedc3948237b2d8aaf709",
     "contract_test.go": "ed66e014495d1c3540bdf798470e3a56bae4a210d67d67c9ea913e7a262e849b",
-    "consumer.py": "4a4128e81799786c1cd448030015c46e98845c2de7ca46a426d0eb3920c0a9ac",
+    "consumer.py": "2fd241823ff502d9c77c5ca996d81773442b913bc2dc6bc80931d0c360888659",
     "run.py": "8dfa2456a1d9db48b993306cf56820965721e290720b7c5d6a284b81adaa33f9",
     "adjudicate.py": "c7ee2e07f55562ece96eb6a71ba7ee741348e8fb7d5fd8de32d0785fee25217b",
     "launch-remote.sh": "f9eb952437a95aa952434d593c2eeb5ded24addf77e695a3566759227e3dabac",
