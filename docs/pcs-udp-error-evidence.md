@@ -4,10 +4,13 @@ This candidate starts from production source `224825dbc5e0dd01e55c27785d67caeb6e
 It describes fast outbound UDP errors that previously had only an aggregate
 counter. It does not repair or explain TCP downstream QUIC write stalls.
 
-Status: source and deterministic tests prepared; formatting/parser and
-`git diff --check` checks passed. No Go compilation, unit/race execution,
-performance acceptance, deployment or production parameter change has occurred.
-The candidate must remain on hold until those checks are scheduled and pass.
+Status on 2026-10-18: **HOLD, not deployed**. Tested runtime source is
+`206921c72fb2d8f3d53b6f60507daff345a617ee`; subsequent documentation/result commits
+must not silently replace that runtime pin. Functional, race, security,
+fragment-accounting and injected UDP-error recovery checks passed. The original
+mixed-load performance profile is **RESOURCE_INCONCLUSIVE** because CPU quota
+interfered. It is retained and cannot be replaced by a favorable microbenchmark
+or a later paced-load result. Production forwarding/configuration is unchanged.
 
 ## Behavior retained
 
@@ -102,8 +105,11 @@ timestamp gauges. The existing 24-hour rollup does not automatically include
 these new fields. Collector integration is outside this source-only candidate.
 
 Performance acceptance remains production observer versus this observer using
-frozen paired workloads: at least 95% goodput, no more than 20% CPU per delivered
-MB or small-request P95 increase, and at most 16 MiB memory increase. Resource
+frozen paired workloads: at least 95% goodput, no more than 20% CPU per completed
+payload byte, and at most 16 MiB increase in child-server peak RSS. The frozen
+small-request guard fails when P95 exceeds both baseline 1.20x and baseline plus
+50 ms. Startup peak RSS, whole-container memory and allocations have distinct
+meanings and are reported separately. Resource
 throttling over the predeclared limit makes the result inconclusive. Include a
 bounded fast-error workload to check worst-case classification/log volume and a
 TCP-plus-UDP regression; an observer microbenchmark alone is insufficient.
@@ -116,3 +122,63 @@ identify the socket family: a dual-stack socket can send to an IPv4 destination.
 Missing or non-UDP typed error addresses remain `unknown`; no socket-family
 inference is made from a no-address selection error. The earlier unbuilt draft
 name `socket_family` was corrected before source or collector deployment.
+
+## Validation snapshot and limits
+
+The [unit/race results](results/udp-error-evidence-20261018/udp-error-unit-race-summary.json)
+contain 34 core-server and 15 outbound top-level tests in both functional and race
+runs. The exact race expressions are recorded; this is not a claim that every
+app package received a race run. Tests used Go 1.25.6, one Go scheduler thread,
+0.4 CPU and 512 MiB with no extra swap, offline loopback containers and an
+exclusive shared test lock. There was no production or public-network load.
+
+The [paired microbenchmarks](results/udp-error-evidence-20261018/udp-error-benchmark-summary.json)
+show the cost of the new evidence, not a performance gain:
+
+- Fixed struct growth: 1,176 bytes per tracked connection. Allocator growth in
+  the retained-128 fixture was 1,344 bytes per connection, or 172,032 bytes total.
+- Empty UDP snapshot JSON: median 630 to 816 bytes. Snapshot plus JSON elapsed
+  time under the fixed CPU quota: median 4.701 to 7.932 microseconds.
+- One error class: median 630 to 1,167 JSON bytes and 4.820 to 12.984 microseconds.
+- All 40 cells plus two latest descriptors: 5,153 JSON bytes, below 12 KiB.
+- At a hypothetical 128 continuously observed authenticated connections and
+  one snapshot every five seconds, 186 added bytes imply about 411 MB/day of
+  extra log payload. This is not measured production volume; other emitted
+  stream/close records can add snapshots. Existing rotation bounds remain
+  relevant. The fixed state cap also includes tracked unauthenticated handshakes.
+
+Before running any benchmark, its initial test-only custom metrics were found
+before `B.ResetTimer`, which clears them in Go 1.25.6. Separate v2 fixtures moved
+those fixed metrics after `StopTimer`. No original benchmark was run, no source
+behavior or measured loop was changed, and the earlier unit/race inputs remain
+preserved. This correction is not a discarded unfavorable benchmark result.
+
+The [real protocol and mixed-load summary](results/udp-error-evidence-20261018/udp-error-mixed-v2-summary.json)
+records valid/invalid trust, hostname and auth behavior, observer-off/on checks,
+1/4-connection UDP fragmentation/accounting and denial-before-send behavior.
+A deterministic test-only outbound produced one typed WriteTo error. An explicit
+complete-zero snapshot preceded it; the collector observed exactly one increment,
+did not recount replayed events and restored its persistent baseline. The same
+UDP child and another child recovered. A shared TCP stream already established
+but waiting at a gated origin subsequently completed a 2 MiB SHA check: this does
+not claim that TCP payload was actively downloading at the instant of injection.
+Close races, occupied timing slots and late-final gaps were verified separately
+by deterministic unit/race tests.
+
+The original one-connection mixed test ran eight fixed ABBAABBA rounds. All
+payloads and the numerical regression gates passed, but seven rounds spent
+15.7–26.0% of workload wall time throttled, exceeding the predeclared 10% limit.
+Consequently it is **RESOURCE_INCONCLUSIVE**. Its group medians (2.374 to 2.364
+MB/s, small P95 82.64 to 75.58 ms and CPU per byte about -4.3%) cannot establish
+an improvement or successful overhead acceptance. The original four-connection
+profile was not run after this resource failure. Maximum throughput remains
+unknown.
+
+A separately frozen calibration retains every payload and connection count,
+limits the synthetic bulk origin to an aggregate 500,000 bytes/s in chunks no
+larger than 8 KiB, and distributes small/UDP operations across its planned bulk
+duration. Both first-second and whole-workload throttling must stay at or below 10%,
+and real concurrency/periodic samples must be observed. This paced stratum is
+separate from saturated capacity. No candidate paired result or release approval
+is implied by baseline resource calibration. Scheduled lateness is reported
+separately from request-start-to-completion small-operation latency.

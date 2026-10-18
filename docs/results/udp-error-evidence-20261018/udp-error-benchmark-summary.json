@@ -1,0 +1,548 @@
+{
+  "schema": 1,
+  "updated_utc": "2026-10-18T05:29:03.820542+00:00",
+  "candidate": "206921c72fb2d8f3d53b6f60507daff345a617ee",
+  "rounds": [
+    {
+      "step": "paired-00-baseline",
+      "variant": "baseline",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:20:50.883024+00:00",
+      "end_utc": "2026-10-18T05:20:53.348089+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 44347,
+          "ns/op": 5825.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 104185,
+          "ns/op": 4737.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 4756,
+          "ns/op": 63250.0,
+          "fixed-B/128conn": 57344.0,
+          "B/op": 58496.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.495626,
+      "cgroup_throttled_seconds": 0.498855,
+      "oom_killed": false,
+      "memory_peak_bytes": 10616832,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-00-baseline"
+    },
+    {
+      "step": "paired-01-candidate",
+      "variant": "candidate",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:20:53.697177+00:00",
+      "end_utc": "2026-10-18T05:20:56.095605+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 36338,
+          "ns/op": 7836.0,
+          "JSON-B/snapshot": 817.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1216.0,
+          "allocs/op": 3.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 21656,
+          "ns/op": 12925.0,
+          "JSON-B/snapshot": 1167.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1776.0,
+          "allocs/op": 5.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 2721,
+          "ns/op": 194803.0,
+          "fixed-B/128conn": 207872.0,
+          "B/op": 230528.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.525045,
+      "cgroup_throttled_seconds": 0.508619,
+      "oom_killed": false,
+      "memory_peak_bytes": 7852032,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-01-candidate"
+    },
+    {
+      "step": "paired-02-candidate",
+      "variant": "candidate",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:20:56.622457+00:00",
+      "end_utc": "2026-10-18T05:20:58.958010+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 71444,
+          "ns/op": 8027.0,
+          "JSON-B/snapshot": 816.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1216.0,
+          "allocs/op": 3.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 22268,
+          "ns/op": 13043.0,
+          "JSON-B/snapshot": 1167.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1776.0,
+          "allocs/op": 5.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 2890,
+          "ns/op": 167817.0,
+          "fixed-B/128conn": 207872.0,
+          "B/op": 230528.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.617455,
+      "cgroup_throttled_seconds": 0.892324,
+      "oom_killed": false,
+      "memory_peak_bytes": 8859648,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-02-candidate"
+    },
+    {
+      "step": "paired-03-baseline",
+      "variant": "baseline",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:20:59.257003+00:00",
+      "end_utc": "2026-10-18T05:21:01.429018+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 46368,
+          "ns/op": 4410.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 107085,
+          "ns/op": 4611.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 3948,
+          "ns/op": 60186.0,
+          "fixed-B/128conn": 57344.0,
+          "B/op": 58496.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.579234,
+      "cgroup_throttled_seconds": 0.716195,
+      "oom_killed": false,
+      "memory_peak_bytes": 7356416,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-03-baseline"
+    },
+    {
+      "step": "paired-04-baseline",
+      "variant": "baseline",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:21:01.760916+00:00",
+      "end_utc": "2026-10-18T05:21:03.753655+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 43003,
+          "ns/op": 4992.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 43102,
+          "ns/op": 4938.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 5600,
+          "ns/op": 68253.0,
+          "fixed-B/128conn": 57344.0,
+          "B/op": 58496.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.540546,
+      "cgroup_throttled_seconds": 0.700595,
+      "oom_killed": false,
+      "memory_peak_bytes": 9560064,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-04-baseline"
+    },
+    {
+      "step": "paired-05-candidate",
+      "variant": "candidate",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:21:04.074305+00:00",
+      "end_utc": "2026-10-18T05:21:05.919972+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 28635,
+          "ns/op": 7543.0,
+          "JSON-B/snapshot": 816.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1216.0,
+          "allocs/op": 3.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 21103,
+          "ns/op": 12196.0,
+          "JSON-B/snapshot": 1167.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1776.0,
+          "allocs/op": 5.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 1598,
+          "ns/op": 140283.0,
+          "fixed-B/128conn": 207872.0,
+          "B/op": 230528.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.388897,
+      "cgroup_throttled_seconds": 0.39322,
+      "oom_killed": false,
+      "memory_peak_bytes": 7540736,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-05-candidate"
+    },
+    {
+      "step": "paired-06-candidate",
+      "variant": "candidate",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:21:06.343347+00:00",
+      "end_utc": "2026-10-18T05:21:08.121231+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 32782,
+          "ns/op": 8695.0,
+          "JSON-B/snapshot": 816.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1216.0,
+          "allocs/op": 3.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 21176,
+          "ns/op": 13190.0,
+          "JSON-B/snapshot": 1167.0,
+          "state-B/conn": 1624.0,
+          "B/op": 1776.0,
+          "allocs/op": 5.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 2325,
+          "ns/op": 166447.0,
+          "fixed-B/128conn": 207872.0,
+          "B/op": 230528.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.465668,
+      "cgroup_throttled_seconds": 0.672661,
+      "oom_killed": false,
+      "memory_peak_bytes": 7639040,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-06-candidate"
+    },
+    {
+      "step": "paired-07-baseline",
+      "variant": "baseline",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:21:08.400703+00:00",
+      "end_utc": "2026-10-18T05:21:10.542181+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+          "iterations": 51326,
+          "ns/op": 3996.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+          "iterations": 63652,
+          "ns/op": 4902.0,
+          "JSON-B/snapshot": 630.0,
+          "state-B/conn": 448.0,
+          "B/op": 848.0,
+          "allocs/op": 2.0
+        },
+        "BenchmarkUDPErrorCandidateRetained128States": {
+          "iterations": 6253,
+          "ns/op": 60075.0,
+          "fixed-B/128conn": 57344.0,
+          "B/op": 58496.0,
+          "allocs/op": 129.0
+        }
+      },
+      "cgroup_usage_seconds": 0.581279,
+      "cgroup_throttled_seconds": 0.627338,
+      "oom_killed": false,
+      "memory_peak_bytes": 8577024,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052050Z-bench/paired-07-baseline"
+    },
+    {
+      "step": "candidate-error-context",
+      "variant": "candidate",
+      "status": "PASS",
+      "start_utc": "2026-10-18T05:22:08.439927+00:00",
+      "end_utc": "2026-10-18T05:22:10.565535+00:00",
+      "benchmarks": {
+        "BenchmarkUDPErrorCandidateRecord": {
+          "iterations": 112677,
+          "ns/op": 3497.0,
+          "added-state-B/conn": 1176.0,
+          "B/op": 48.0,
+          "allocs/op": 5.0
+        },
+        "BenchmarkUDPErrorCandidateFullSnapshotJSON": {
+          "iterations": 7981,
+          "ns/op": 72911.0,
+          "JSON-B/snapshot": 5153.0,
+          "B/op": 14032.0,
+          "allocs/op": 12.0
+        }
+      },
+      "cgroup_usage_seconds": 0.410143,
+      "cgroup_throttled_seconds": 0.451165,
+      "oom_killed": false,
+      "memory_peak_bytes": 7806976,
+      "artifact": "udp-error-bench-validation-v2/run-20261018T052208Z-bench-error-context/candidate-error-context"
+    }
+  ],
+  "comparison": {
+    "BenchmarkUDPErrorCandidateNoErrorSnapshotJSON": {
+      "baseline": {
+        "rounds": 4,
+        "metrics": {
+          "allocs/op": {
+            "min": 2.0,
+            "median": 2.0,
+            "max": 2.0
+          },
+          "B/op": {
+            "min": 848.0,
+            "median": 848.0,
+            "max": 848.0
+          },
+          "state-B/conn": {
+            "min": 448.0,
+            "median": 448.0,
+            "max": 448.0
+          },
+          "JSON-B/snapshot": {
+            "min": 630.0,
+            "median": 630.0,
+            "max": 630.0
+          },
+          "ns/op": {
+            "min": 3996.0,
+            "median": 4701.0,
+            "max": 5825.0
+          }
+        }
+      },
+      "candidate": {
+        "rounds": 4,
+        "metrics": {
+          "allocs/op": {
+            "min": 3.0,
+            "median": 3.0,
+            "max": 3.0
+          },
+          "B/op": {
+            "min": 1216.0,
+            "median": 1216.0,
+            "max": 1216.0
+          },
+          "state-B/conn": {
+            "min": 1624.0,
+            "median": 1624.0,
+            "max": 1624.0
+          },
+          "JSON-B/snapshot": {
+            "min": 816.0,
+            "median": 816.0,
+            "max": 817.0
+          },
+          "ns/op": {
+            "min": 7543.0,
+            "median": 7931.5,
+            "max": 8695.0
+          }
+        }
+      },
+      "candidate_over_baseline_median": {
+        "allocs/op": 1.5,
+        "B/op": 1.4339622641509433,
+        "state-B/conn": 3.625,
+        "JSON-B/snapshot": 1.2952380952380953,
+        "ns/op": 1.687194213997022
+      }
+    },
+    "BenchmarkUDPErrorCandidateOneErrorSnapshotJSON": {
+      "baseline": {
+        "rounds": 4,
+        "metrics": {
+          "allocs/op": {
+            "min": 2.0,
+            "median": 2.0,
+            "max": 2.0
+          },
+          "B/op": {
+            "min": 848.0,
+            "median": 848.0,
+            "max": 848.0
+          },
+          "state-B/conn": {
+            "min": 448.0,
+            "median": 448.0,
+            "max": 448.0
+          },
+          "JSON-B/snapshot": {
+            "min": 630.0,
+            "median": 630.0,
+            "max": 630.0
+          },
+          "ns/op": {
+            "min": 4611.0,
+            "median": 4819.5,
+            "max": 4938.0
+          }
+        }
+      },
+      "candidate": {
+        "rounds": 4,
+        "metrics": {
+          "allocs/op": {
+            "min": 5.0,
+            "median": 5.0,
+            "max": 5.0
+          },
+          "B/op": {
+            "min": 1776.0,
+            "median": 1776.0,
+            "max": 1776.0
+          },
+          "state-B/conn": {
+            "min": 1624.0,
+            "median": 1624.0,
+            "max": 1624.0
+          },
+          "JSON-B/snapshot": {
+            "min": 1167.0,
+            "median": 1167.0,
+            "max": 1167.0
+          },
+          "ns/op": {
+            "min": 12196.0,
+            "median": 12984.0,
+            "max": 13190.0
+          }
+        }
+      },
+      "candidate_over_baseline_median": {
+        "allocs/op": 2.5,
+        "B/op": 2.0943396226415096,
+        "state-B/conn": 3.625,
+        "JSON-B/snapshot": 1.8523809523809525,
+        "ns/op": 2.694055399937753
+      }
+    },
+    "BenchmarkUDPErrorCandidateRetained128States": {
+      "baseline": {
+        "rounds": 4,
+        "metrics": {
+          "fixed-B/128conn": {
+            "min": 57344.0,
+            "median": 57344.0,
+            "max": 57344.0
+          },
+          "B/op": {
+            "min": 58496.0,
+            "median": 58496.0,
+            "max": 58496.0
+          },
+          "allocs/op": {
+            "min": 129.0,
+            "median": 129.0,
+            "max": 129.0
+          },
+          "ns/op": {
+            "min": 60075.0,
+            "median": 61718.0,
+            "max": 68253.0
+          }
+        }
+      },
+      "candidate": {
+        "rounds": 4,
+        "metrics": {
+          "fixed-B/128conn": {
+            "min": 207872.0,
+            "median": 207872.0,
+            "max": 207872.0
+          },
+          "B/op": {
+            "min": 230528.0,
+            "median": 230528.0,
+            "max": 230528.0
+          },
+          "allocs/op": {
+            "min": 129.0,
+            "median": 129.0,
+            "max": 129.0
+          },
+          "ns/op": {
+            "min": 140283.0,
+            "median": 167132.0,
+            "max": 194803.0
+          }
+        }
+      },
+      "candidate_over_baseline_median": {
+        "fixed-B/128conn": 3.625,
+        "B/op": 3.9409190371991247,
+        "allocs/op": 1.0,
+        "ns/op": 2.7079944262613824
+      }
+    }
+  },
+  "capacity": {
+    "added_fixed_bytes_per_connection": 1176.0,
+    "added_fixed_bytes_128_connections": 150528.0,
+    "empty_snapshot_extra_JSON_bytes": 186.0,
+    "theoretical_extra_log_bytes_per_day_at128_connections_interval5s": 411402240.00000006,
+    "memory_gate_pass": true,
+    "log_volume_scope": "Upper scenario of128 continuously observed sessions and one UDP snapshot each5s; extra stream/close records can add snapshots. Not measured production volume.",
+    "retained128_added_allocation_bytes_per_benchmark_op": 172032.0,
+    "effective_added_allocation_bytes_per_connection_in_fixture": 1344.0,
+    "allocation_note": "Allocator size classes make allocated growth exceed unsafe.Sizeof growth; array/pointer scaffolding is identical in both fixtures. Not a production RSS measurement.",
+    "full_snapshot_JSON_bytes_max": 5153.0,
+    "full_snapshot_under_12KiB": true
+  },
+  "status": "MICROBENCHMARK_CONTEXT_ONLY",
+  "limits": [
+    "No whole-proxy release PASS from microbenchmark.",
+    "Go ns/op is elapsed under .4 CPU quota; per-step process group CPU/quotas separately shown. Snapshot CPU cost not equal throughput or end-to-end stall improvement.",
+    "All runs retained; medians are group aggregates. Fixed bytes are unsafe.Sizeof, not total RSS."
+  ]
+}
