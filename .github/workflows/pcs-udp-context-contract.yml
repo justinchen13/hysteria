@@ -47,6 +47,10 @@ jobs:
           set -euo pipefail
           output="$GITHUB_WORKSPACE/dist/pcs-udp-context-contract"
           log="$RUNNER_TEMP/pcs-udp-context-contract-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT.log"
+          # Keep the parent traversable by its runner owner; the unit creates
+          # only the private root-owned result leaf under it.
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          test "$(realpath "$GITHUB_WORKSPACE/dist")" = "$GITHUB_WORKSPACE/dist"
           # The restricted unit runs as root while checkout belongs to runner.
           # Trust exactly this ephemeral checkout for git archive, not all paths.
           sudo git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -59,8 +63,8 @@ jobs:
             "GITHUB_SHA=$GITHUB_SHA" "GITHUB_RUN_ID=$GITHUB_RUN_ID" \
             "GITHUB_RUN_ATTEMPT=$GITHUB_RUN_ATTEMPT" \
             bash tools/pcs-udp-context-contract/launch-remote.sh "$GITHUB_WORKSPACE" "$output" \
-            >"$log" 2>&1
-          status=$?
+            2>&1 | tee "$log"
+          status=${PIPESTATUS[0]}
           if test "$status" -eq 0; then
             sudo python3 - "$output/adjudication.json" <<'PY'
           import json, pathlib, sys
@@ -81,7 +85,7 @@ jobs:
           # Only this fixed synthetic-result tree is made readable for upload.
           # No system/container/source/proxy paths are modified.
           sudo mkdir -p "$output"
-          test "$(realpath "$output")" = "$GITHUB_WORKSPACE/dist/pcs-udp-context-contract"
+          test "$(sudo realpath "$output")" = "$GITHUB_WORKSPACE/dist/pcs-udp-context-contract"
           test -z "$(sudo find "$output" -type l -print -quit)"
           sudo chown -R --no-dereference "$(id -u):$(id -g)" "$output"
           for suffix in log exit; do
