@@ -75,11 +75,11 @@ func TestUDPErrorClassifier(t *testing.T) {
 			t.Fatal("wrapped classification changed")
 		}
 	}
-	for _, tc := range []struct{ ip, family string }{{"192.0.2.1", "ipv4"}, {"2001:db8::1", "ipv6"}} {
+	for _, tc := range []struct{ ip, family string }{{"192.0.2.1", "ipv4"}, {"::ffff:192.0.2.1", "ipv4"}, {"2001:db8::1", "ipv6"}} {
 		err := &net.OpError{Op: "write", Net: "udp", Addr: &net.UDPAddr{IP: net.ParseIP(tc.ip), Port: 1234}, Err: &os.SyscallError{Syscall: "sendto", Err: syscall.EMSGSIZE}}
 		class, layer, family := classifyUDPError(err)
 		if class != "message_too_large" || layer != "socket_write" || family != tc.family {
-			t.Fatal("UDP family/class not preserved")
+			t.Fatal("error address family/class not preserved")
 		}
 	}
 	var nilAddress *net.UDPAddr
@@ -114,7 +114,7 @@ func TestUDPErrorRecordsBoundedPrivateAndSnapshotImmutable(t *testing.T) {
 		t.Fatal("published snapshot mutated")
 	}
 	b, errJSON := json.Marshal(a)
-	if errJSON != nil || strings.Contains(string(b), "192.0.2.1") || strings.Contains(string(b), "PRIVATE") {
+	if errJSON != nil || strings.Contains(string(b), "192.0.2.1") || strings.Contains(string(b), "PRIVATE") || strings.Contains(string(b), `"socket_family"`) || !strings.Contains(string(b), `"error_address_family":"ipv4"`) {
 		t.Fatal("private error/endpoint leaked")
 	}
 	if unsafe.Sizeof(udpErrorState{}) > 2048 {

@@ -55,7 +55,7 @@ type UDPErrorLast struct {
 	Phase              string `json:"phase"`
 	Class              string `json:"class"`
 	Layer              string `json:"layer"`
-	SocketFamily       string `json:"socket_family"`
+	ErrorAddressFamily string `json:"error_address_family"`
 	CompletedAuthAgeUS int64  `json:"completed_auth_age_us"`
 	DurationUS         *int64 `json:"duration_us"`
 	RequestedBytes     int    `json:"requested_bytes"`
@@ -113,6 +113,8 @@ func classifyUDPError(err error) (class, layer, family string) {
 			return "outbound_mode_invalid", "address_selection", family
 		}
 	}
+	// Addr describes the destination in this error, not the actual socket family.
+	// A dual-stack socket can report an IPv4 destination.
 	var op *net.OpError
 	if errors.As(err, &op) && op != nil && op.Op == "write" {
 		layer = "socket_write"
@@ -215,7 +217,7 @@ func (u *udpEvidence) errorSnapshot() *UDPErrorDetail {
 		}
 		if seen[phase] {
 			r := latest[phase]
-			v := UDPErrorLast{Phase: udpErrorPhases[phase], Class: r.class, Layer: r.layer, SocketFamily: r.family, CompletedAuthAgeUS: r.atUS, RequestedBytes: r.requested, WrittenBytes: r.written, UDPEntryClosing: r.entryClosing, QUICEnded: r.ended}
+			v := UDPErrorLast{Phase: udpErrorPhases[phase], Class: r.class, Layer: r.layer, ErrorAddressFamily: r.family, CompletedAuthAgeUS: r.atUS, RequestedBytes: r.requested, WrittenBytes: r.written, UDPEntryClosing: r.entryClosing, QUICEnded: r.ended}
 			if r.durationKnown {
 				d := r.elapsedUS
 				v.DurationUS = &d

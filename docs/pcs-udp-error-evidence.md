@@ -28,8 +28,8 @@ The existing private direct-outbound error types gain a fixed-class method.
 Their concrete identity, Error text and Unwrap behavior are retained. Core uses
 a structural interface, not an import of extras. Unknown method values are
 ignored. DNS/errno classification uses types and `errors.Is/As`, never raw error
-strings. Socket family is emitted only as ipv4/ipv6/unknown from a typed error
-address; no raw address is retained. A `no_ipv6` selection error is not proof
+strings. Error destination address family is emitted only as ipv4/ipv6/unknown from
+a typed error address; no raw address is retained. A `no_ipv6` selection error is not proof
 that a kernel IPv6 send was attempted.
 
 ## Schema and measurement bounds
@@ -46,7 +46,7 @@ contains:
   target-write calls. Missing classes in a supported complete snapshot mean
   zero; missing/unsupported `error_detail` means unknown.
 - `latest`: at most one error descriptor per phase, with fixed class/layer,
-  socket-family enum, completion authentication age, requested/returned bytes,
+  `error_address_family` enum from the typed error destination address, completion authentication age, requested/returned bytes,
   optional operation duration and observed UDP-entry/QUIC close flags.
   `duration_us: null` means the eight existing operation slots were occupied;
   the error itself is still counted.
@@ -110,3 +110,9 @@ TCP-plus-UDP regression; an observer microbenchmark alone is insufficient.
 Any later deployment requires a reviewed rollback and at least 30 minutes of
 observation with persistent collection. No traffic or no observed errors is not
 proof of repaired behavior, and evidence improvements are not proxy speed gains.
+
+The `error_address_family` field describes `net.OpError.Addr` only. It does not
+identify the socket family: a dual-stack socket can send to an IPv4 destination.
+Missing or non-UDP typed error addresses remain `unknown`; no socket-family
+inference is made from a no-address selection error. The earlier unbuilt draft
+name `socket_family` was corrected before source or collector deployment.
