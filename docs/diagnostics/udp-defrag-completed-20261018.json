@@ -1,0 +1,62 @@
+{
+  "status": "CONFIRMED_OLD_DEFECT_AND_NEW_FUNCTION_TESTS_PASS",
+  "utc": "2026-10-18T17:28:35.326323+00:00",
+  "source_base": "06ab4eaea8e6c0ad85e0eebeb43d51773af7fcc4",
+  "scope": "network-none in-process functions; no live integration, deployment or speed claim",
+  "finding": "Old Defragger drops second fully fragmented message when its completed predecessor used the same PacketID and fragment count; clearing completed assembly restores delivery for this deterministic input.",
+  "patch": "Reset only private Defragger fields after building complete independent payload; keep inflight duplicate and ordering behavior.",
+  "checks": {
+    "old-negative": {
+      "top_level_pass": 0,
+      "subtest_pass": 0,
+      "failures": [
+        "TestDefraggerCompletedIDCanBeReused",
+        "PACKAGE"
+      ],
+      "skip_count": 0,
+      "sha256": "6a38044091f71c056d156405d46b1ecd757c4c98117a26effc2a0fccfa3c46fd",
+      "first_utc": "2026-10-18T17:27:31.006868739Z",
+      "last_utc": "2026-10-18T17:27:31.014946532Z"
+    },
+    "new-normal": {
+      "top_level_pass": 8,
+      "subtest_pass": 14,
+      "failures": [],
+      "skip_count": 0,
+      "sha256": "77a14b943f37065b7ce20711e5e02a6d167ebddacce7c8abd098d78d74a94bab",
+      "first_utc": "2026-10-18T17:27:35.071601862Z",
+      "last_utc": "2026-10-18T17:27:35.10037005Z"
+    },
+    "new-race": {
+      "top_level_pass": 8,
+      "subtest_pass": 14,
+      "failures": [],
+      "skip_count": 0,
+      "sha256": "6993da2c358f6f39d796b2f7028991c0c284aeed8b16273d582907f117ec76e1",
+      "first_utc": "2026-10-18T17:27:40.425633065Z",
+      "last_utc": "2026-10-18T17:27:41.859620829Z"
+    }
+  },
+  "limits": {
+    "NetworkMode": "none",
+    "CpuPeriod": 1000000,
+    "CpuQuota": 400000,
+    "Memory": 536870912,
+    "MemorySwap": 536870912,
+    "PidsLimit": 128
+  },
+  "memory_event_delta": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0,
+    "oom_group_kill": 0
+  },
+  "cleanup": true,
+  "raw_wrapper_result_sha256": "16d548a0116a62e433e95cf473ee2729328ca336fa4f34b175870bef6e1123fb",
+  "original_wrapper_status": "FAIL",
+  "wrapper_failure_explanation": "Original wrapper incorrectly searched literal <nil> in JSON-escaped raw text. Decoded Go Output contains <nil>; expected old negative and all new positive/race tests completed. No test rerun or result overwrite. Attempt1 separately retained setup failure (no tests reached).",
+  "a4_causation": "UNKNOWN: A4 did not preserve PacketID; source defect is proven but occurrence in that run is not.",
+  "production": "UNCHANGED; release still requires broader integration/safety review; user requested end-of-round stop."
+}

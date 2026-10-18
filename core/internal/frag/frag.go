@@ -70,6 +70,9 @@ func (d *Defragger) Feed(m *protocol.UDPMessage) *protocol.UDPMessage {
 			m.Data = data
 			m.FragID = 0
 			m.FragCount = 1
+			// A completed assembly is not an indefinite PacketID replay cache.
+			// Peers can reuse this 16-bit ID for a later fragmented datagram.
+			*d = Defragger{}
 			return m
 		}
 	}
