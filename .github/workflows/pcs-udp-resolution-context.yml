@@ -1,0 +1,53 @@
+name: Verify bounded UDP resolution error context
+
+on:
+  push:
+    branches: [pcs/udp-resolution-context]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pcs-udp-resolution-context
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.repository == 'justinchen13/hysteria' && github.ref == 'refs/heads/pcs/udp-resolution-context'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CGO_ENABLED: '0'
+      GOOS: linux
+      GOARCH: amd64
+      GOAMD64: v1
+      GOTOOLCHAIN: local
+      GOWORK: 'off'
+      GOMAXPROCS: '1'
+      GOMEMLIMIT: 768MiB
+      HYSTERIA_DISABLE_UPDATE_CHECK: '1'
+    steps:
+      - name: Check out dedicated diagnostic branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select exact Go toolchain
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.25.6'
+          architecture: x64
+          check-latest: false
+          cache: false
+      - name: Verify frozen sources and run scoped offline checks
+        run: python3 tools/pcs-udp-resolution-context/verify.py
+      - name: Preserve results including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: hy-udp-context-linux-amd64-${{ github.sha }}-${{ github.run_attempt }}
+          path: dist/pcs-udp-resolution-context/
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
+          include-hidden-files: false

@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "status": "ROOT_REVIEWED_REMOTE_ONLY",
+  "repository": "justinchen13/hysteria",
+  "ref": "refs/heads/pcs/udp-resolution-context",
+  "baseline_commit": "206921c72fb2d8f3d53b6f60507daff345a617ee",
+  "candidate_commit": "06ab4eaea8e6c0ad85e0eebeb43d51773af7fcc4",
+  "go": "1.25.6",
+  "quic_go": "v0.54.1-0.20250907230547-eb32f8aec5e2",
+  "version_prefix": "v2.6.4-udp-context-ci",
+  "build_date": "2026-10-18T11:18:59Z",
+  "module_sha256": {
+    "core/go.mod": "abcd07f35442183aa8207bec00a3b25ce211d9aac4b52b330a0085b826c693f1",
+    "core/go.sum": "2c2aad0042b72002d7c0492d6833eb052d5597991e11214b337fe0a0a86ffaba",
+    "extras/go.mod": "1067441b77e903c5937a4269660bd1329031929744fb19c5114a35df1f0f2688",
+    "extras/go.sum": "f9b8beefc668ee3efe009ec55830b909089404a719cf8426afcfbb5d82be3cb3",
+    "app/go.mod": "323fe720551205ef03a651c69ba3c16bca3aed89016433ec4144c18f28dbe374",
+    "app/go.sum": "82bc520171fdb6d918f9198834c9693152932b2cde4839052e91ab445ae6ac4d"
+  },
+  "tests": {
+    "core": {
+      "existing": [
+        "TestUDPErrorClassifier",
+        "TestUDPErrorRecordsBoundedPrivateAndSnapshotImmutable",
+        "TestUDPErrorFeedPreservesReturnAndNextDatagram",
+        "TestUDPErrorInitAndDisabledSemantics",
+        "TestUDPErrorCountsWithoutOperationSlot",
+        "TestUDPErrorDisabledWritePreservesOutcome",
+        "TestUDPErrorCloseRaceAndLateFinalCoverage"
+      ],
+      "new": [
+        "TestUDPOutboundContextSanitizesAndOwnsValues",
+        "TestUDPOutboundContextUnknownAndInvalidCacheAge",
+        "TestUDPOutboundContextLatestSnapshotIsIndependent"
+      ]
+    },
+    "extras": {
+      "existing": [
+        "TestUDPResolveReuseLifetimeAndOwnership",
+        "TestUDPResolveReuseTargetsAndBound",
+        "TestUDPResolveReuseFailuresAreNotCached",
+        "TestUDPResolveReuseFailedWriteDoesNotEvictReplacement",
+        "TestUDPResolveReuseLookupDoesNotLockHitsOrClose",
+        "TestUDPResolveReuseConcurrentAccess",
+        "TestUDPResolveLiteralClassification"
+      ],
+      "new": [
+        "TestUDPOutboundContextFamiliesAndErrorIdentity",
+        "TestUDPOutboundContextActualNoAddressAndDNSBranches",
+        "TestUDPOutboundContextPartialResultAndMissingEvidence",
+        "TestUDPOutboundContextCacheHitAgeAndExpiry",
+        "TestUDPOutboundContextRealCacheFailureEviction"
+      ]
+    }
+  },
+  "benchmark_sha256": "f99f63826ff433f039791d47ca8c7a2dc36a1a57ae065214b8919681064d19eb",
+  "benchmark_cases": [
+    "cache_hit",
+    "supplied_no_ipv4_error",
+    "cache_fill_then_failed_write"
+  ],
+  "benchmark_order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "excluded": [
+    "all ACK-height/congestion algorithm regressions",
+    "all route/HOL/network fixtures",
+    "all generated CLI execution",
+    "production changes"
+  ],
+  "candidate_build_repetition": 2,
+  "cost_limits": "ABBA three pure cases, 200ms each; descriptive ns/op B/op allocs/op only; no runtime deployment acceptance",
+  "release_gate": "Parent review of full evidence; remote scoped checks are not a live service/security/performance acceptance"
+}
