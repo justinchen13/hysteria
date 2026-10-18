@@ -60,23 +60,30 @@ func isUDPLiteralHost(host string) bool {
 }
 
 func (c *udpResolveCache) resolve(addr *AddrEx) (*AddrEx, *udpResolveEntry, error) {
+	resolved, entry, _, err := c.resolveObserved(addr)
+	return resolved, entry, err
+}
+
+// resolveObserved returns the already taken cache branch, without new lookups
+// or changing cache lifetime/ownership. The extra scalar is used only on error.
+func (c *udpResolveCache) resolveObserved(addr *AddrEx) (*AddrEx, *udpResolveEntry, bool, error) {
 	// Never mutate the caller's address or publish an internal IP slice.
 	resolved := &AddrEx{Host: addr.Host, Port: addr.Port}
 	if tryParseIP(resolved) {
-		return resolved, nil, nil
+		return resolved, nil, false, nil
 	}
 	key := udpResolveKey{host: addr.Host, port: addr.Port}
 	now := c.now()
 	c.mu.Lock()
 	if c.closed {
 		c.mu.Unlock()
-		return nil, nil, net.ErrClosed
+		return nil, nil, false, net.ErrClosed
 	}
 	if entry, ok := c.entries[key]; ok {
 		if now.Before(entry.expires) {
 			resolved.ResolveInfo = cloneUDPResolveInfo(entry.info)
 			c.mu.Unlock()
-			return resolved, entry, nil
+			return resolved, entry, true, nil
 		}
 		delete(c.entries, key)
 	}
@@ -87,18 +94,18 @@ func (c *udpResolveCache) resolve(addr *AddrEx) (*AddrEx, *udpResolveEntry, erro
 	if info == nil || info.Err != nil || (info.IPv4 == nil && info.IPv6 == nil) {
 		// No negative or stale-if-error cache. Let the normal outbound preserve
 		// its existing error handling, including partially successful results.
-		return resolved, nil, nil
+		return resolved, nil, false, nil
 	}
 	now = c.now()
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.closed {
-		return nil, nil, net.ErrClosed
+		return nil, nil, false, net.ErrClosed
 	}
 	// A concurrent lookup may have already published a fresh result. An older,
 	// slower lookup must not overwrite it or extend its original expiry.
 	if entry, ok := c.entries[key]; ok && now.Before(entry.expires) {
-		return resolved, nil, nil
+		return resolved, nil, false, nil
 	}
 	for k, entry := range c.entries {
 		if !now.Before(entry.expires) {
@@ -120,7 +127,7 @@ func (c *udpResolveCache) resolve(addr *AddrEx) (*AddrEx, *udpResolveEntry, erro
 		expires: now.Add(udpResolveReuseLifetime),
 	}
 	c.entries[key] = entry
-	return resolved, entry, nil
+	return resolved, entry, false, nil
 }
 
 func (c *udpResolveCache) forget(addr *AddrEx, expected *udpResolveEntry) {

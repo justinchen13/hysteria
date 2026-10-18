@@ -334,16 +334,33 @@ func (u *directOutboundUDPConn) ReadFrom(b []byte) (int, *AddrEx, error) {
 
 func (u *directOutboundUDPConn) WriteTo(b []byte, addr *AddrEx) (int, error) {
 	if u.resolveCache == nil || addr.ResolveInfo != nil || isUDPLiteralHost(addr.Host) {
-		return u.writeTo(b, addr)
+		// Preserve the input branch before writeTo fills a missing ResolveInfo.
+		supplied := addr.ResolveInfo != nil
+		n, err := u.writeTo(b, addr)
+		if err != nil {
+			path := "system"
+			if supplied {
+				path = "supplied"
+			} else if isUDPLiteralHost(addr.Host) {
+				path = "literal_input"
+			}
+			err = withUDPOutboundContext(err, addr, addr, path, nil, nil, time.Time{})
+		}
+		return n, err
 	}
-	resolved, entry, err := u.resolveCache.resolve(addr)
+	resolved, entry, hit, err := u.resolveCache.resolveObserved(addr)
 	if err != nil {
-		return 0, err
+		return 0, withUDPOutboundContext(err, addr, resolved, "cache_unavailable", nil, nil, time.Time{})
 	}
 	n, err := u.writeTo(b, resolved)
 	if err != nil {
 		// Do not keep retrying a cached address after a local send failure.
 		u.resolveCache.forget(addr, entry)
+		path := "cache_miss"
+		if hit {
+			path = "cache_hit"
+		}
+		err = withUDPOutboundContext(err, addr, resolved, path, &hit, entry, time.Now())
 	}
 	return n, err
 }

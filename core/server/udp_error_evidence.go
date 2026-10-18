@@ -30,6 +30,7 @@ type udpErrorCell struct {
 type udpErrorRecord struct {
 	class, layer, family string
 	atUS, elapsedUS      int64
+	outbound             *UDPOutboundErrorContext
 	durationKnown        bool
 	requested, written   int
 	entryClosing, ended  bool
@@ -52,16 +53,17 @@ type UDPErrorCounter struct {
 }
 
 type UDPErrorLast struct {
-	Phase              string `json:"phase"`
-	Class              string `json:"class"`
-	Layer              string `json:"layer"`
-	ErrorAddressFamily string `json:"error_address_family"`
-	CompletedAuthAgeUS int64  `json:"completed_auth_age_us"`
-	DurationUS         *int64 `json:"duration_us"`
-	RequestedBytes     int    `json:"requested_bytes"`
-	WrittenBytes       int    `json:"written_bytes"`
-	UDPEntryClosing    bool   `json:"udp_entry_closing"`
-	QUICEnded          bool   `json:"quic_ended"`
+	Phase              string                   `json:"phase"`
+	Class              string                   `json:"class"`
+	Layer              string                   `json:"layer"`
+	ErrorAddressFamily string                   `json:"error_address_family"`
+	CompletedAuthAgeUS int64                    `json:"completed_auth_age_us"`
+	DurationUS         *int64                   `json:"duration_us"`
+	RequestedBytes     int                      `json:"requested_bytes"`
+	WrittenBytes       int                      `json:"written_bytes"`
+	UDPEntryClosing    bool                     `json:"udp_entry_closing"`
+	QUICEnded          bool                     `json:"quic_ended"`
+	Outbound           *UDPOutboundErrorContext `json:"outbound,omitempty"`
 }
 
 type UDPErrorDetail struct {
@@ -174,6 +176,7 @@ func (u *udpEvidence) recordError(phase uint32, err error, requested, written in
 		r.elapsedUS = max(0, (now.Sub(u.connection.created) - time.Duration(op.started.Load())).Microseconds())
 	}
 	r.class, r.layer, r.family = classifyUDPError(err)
+	r.outbound = safeUDPOutboundErrorContext(err)
 	index := len(udpErrorClasses) - 1
 	for i, name := range udpErrorClasses {
 		if name == r.class {
@@ -217,7 +220,7 @@ func (u *udpEvidence) errorSnapshot() *UDPErrorDetail {
 		}
 		if seen[phase] {
 			r := latest[phase]
-			v := UDPErrorLast{Phase: udpErrorPhases[phase], Class: r.class, Layer: r.layer, ErrorAddressFamily: r.family, CompletedAuthAgeUS: r.atUS, RequestedBytes: r.requested, WrittenBytes: r.written, UDPEntryClosing: r.entryClosing, QUICEnded: r.ended}
+			v := UDPErrorLast{Phase: udpErrorPhases[phase], Class: r.class, Layer: r.layer, ErrorAddressFamily: r.family, CompletedAuthAgeUS: r.atUS, RequestedBytes: r.requested, WrittenBytes: r.written, UDPEntryClosing: r.entryClosing, QUICEnded: r.ended, Outbound: cloneUDPOutboundErrorContext(r.outbound)}
 			if r.durationKnown {
 				d := r.elapsedUS
 				v.DurationUS = &d
