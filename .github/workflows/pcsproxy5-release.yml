@@ -1,0 +1,68 @@
+name: Hysteria pcsproxy5 verified release
+on:
+  push:
+    branches: [pcs/udp-defrag-completed-20261018]
+    paths: ['.github/workflows/pcsproxy5-release.yml']
+permissions:
+  contents: read
+concurrency:
+  group: pcsproxy5-release
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.repository == 'justinchen13/hysteria'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GOTOOLCHAIN: local
+      GOWORK: 'off'
+      GOMAXPROCS: '2'
+      PCS_RUNTIME_COMMIT: aa2032966326b4de308bb6f6403bee98259fafce
+      PCS_RELEASE: v2.6.4-pcsproxy5
+      PCS_BUILD_DATE: 2026-10-19T14:47:16Z
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '1.25.6'
+          cache: false
+      - name: Verify exact runtime and safety regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          git worktree add --detach "$RUNNER_TEMP/runtime" "$PCS_RUNTIME_COMMIT"
+          test "$(git -C "$RUNNER_TEMP/runtime" rev-parse HEAD)" = "$PCS_RUNTIME_COMMIT"
+          cd "$RUNNER_TEMP/runtime/core"
+          go test -p 2 -mod=readonly -count=1 -timeout=180s -json ./internal/frag ./client ./server > "$GITHUB_WORKSPACE/dist/core-normal.jsonl"
+          go test -race -p 2 -mod=readonly -count=1 -timeout=180s -json ./internal/frag ./client ./server > "$GITHUB_WORKSPACE/dist/core-race.jsonl"
+          cd ../extras
+          go test -p 2 -mod=readonly -count=1 -timeout=120s -json ./trafficlogger ./outbounds > "$GITHUB_WORKSPACE/dist/extras.jsonl"
+          cd ../app
+          go test -p 2 -mod=readonly -count=1 -timeout=120s -json -run '^TestServer(QUICEvidenceConfig|UDPResolveReuseConfig)$' ./cmd > "$GITHUB_WORKSPACE/dist/app-config.jsonl"
+      - name: Build exact release
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/runtime/app"
+          CGO_ENABLED=0 go build -p 2 -mod=readonly -trimpath -buildvcs=false -ldflags="-s -w -X github.com/apernet/hysteria/app/v2/cmd.appVersion=$PCS_RELEASE -X github.com/apernet/hysteria/app/v2/cmd.appCommit=$PCS_RUNTIME_COMMIT -X github.com/apernet/hysteria/app/v2/cmd.appDate=$PCS_BUILD_DATE -X github.com/apernet/hysteria/app/v2/cmd.appType=pcs -X github.com/apernet/hysteria/app/v2/cmd.appToolchain=go1.25.6 -X github.com/apernet/hysteria/app/v2/cmd.appPlatform=linux -X github.com/apernet/hysteria/app/v2/cmd.appArch=amd64 -X github.com/apernet/hysteria/app/v2/cmd.libVersion=v0.54.1-0.20250907230547-eb32f8aec5e2" -o "$GITHUB_WORKSPACE/dist/hysteria" .
+          go version -m "$GITHUB_WORKSPACE/dist/hysteria" > "$GITHUB_WORKSPACE/dist/build-info.txt"
+          "$GITHUB_WORKSPACE/dist/hysteria" version > "$GITHUB_WORKSPACE/dist/version.txt"
+          curl --fail --location --max-time 60 --max-filesize 15728640 "https://codeload.github.com/justinchen13/hysteria/tar.gz/$PCS_RUNTIME_COMMIT" -o "$GITHUB_WORKSPACE/dist/source.tar.gz"
+          cd "$GITHUB_WORKSPACE/dist"
+          python3 - <<'META'
+          import os,json,hashlib,pathlib
+          p=pathlib.Path('.')
+          d={'source_commit':os.environ['PCS_RUNTIME_COMMIT'],'workflow_commit':os.environ['GITHUB_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'release':os.environ['PCS_RELEASE'],'build_date':os.environ['PCS_BUILD_DATE'],'go':'1.25.6','quic_go':'v0.54.1-0.20250907230547-eb32f8aec5e2','sha256':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in p.iterdir() if f.is_file()}}
+          (p/'provenance.json').write_text(json.dumps(d,indent=2)+'\n')
+          META
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: hysteria-pcsproxy5-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
