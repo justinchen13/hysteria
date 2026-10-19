@@ -1,0 +1,53 @@
+{
+  "status": "PASS_ORIGINAL_E2E_REPRODUCED_NEW_NORMAL_AND_RACE",
+  "start_utc": "2026-10-19T14:45:21.253848+00:00",
+  "end_utc": "2026-10-19T14:46:39.802282+00:00",
+  "checks": {
+    "old-negative": {
+      "top_pass": 0,
+      "sub_pass": 0,
+      "failed": [
+        "TestCompletedPacketIDLoopback/same_id_and_duplicate",
+        "TestCompletedPacketIDLoopback",
+        "PACKAGE"
+      ],
+      "skips": 0,
+      "log_sha256": "ceaa29c3561b2794a980904609f54cdba1a15766e24d49720d2bbc74ac3570e1"
+    },
+    "old-auth-negative": {
+      "top_pass": 0,
+      "sub_pass": 1,
+      "failed": [
+        "TestCompletedPacketIDLoopback",
+        "PACKAGE"
+      ],
+      "skips": 0,
+      "log_sha256": "1173ee283e0b7630c0f0c8cee356d76125734cd4c0b5c069196a1ebb3b4649a8"
+    },
+    "new-normal": {
+      "top_pass": 30,
+      "sub_pass": 30,
+      "failed": [],
+      "skips": 0,
+      "log_sha256": "fd7b719518577dcfb30d326df97e2aa6d6e7a4cfb83c18b8c264cda6e41b57bd"
+    },
+    "new-race": {
+      "top_pass": 30,
+      "sub_pass": 30,
+      "failed": [],
+      "skips": 0,
+      "log_sha256": "c86c91d5be32889f6fcc79e8a2a9c2fec1f739ce6b5ff59e5251bc5ae0005c81"
+    }
+  },
+  "cleanup": true,
+  "scope": "Ephemeral loopback TLS/authenticated QUIC UDP/TCP only inside network-none container; no production/external traffic, throughput or user-failure-rate claim.",
+  "source_delta": "Previously validated completed-assembly reset plus one response Body.Close on failed client authentication; no crypto/authentication acceptance changes.",
+  "prior_failure": "First round candidate integration passed but existing goleak detected an HTTP3 roundTrip goroutine left by wrong-auth response. All original failure records retained; explicit leak regression added, no suppression.",
+  "limitations": "Does not attribute original A4 or real users slow writes to PacketID reuse.",
+  "tested_source_sha256": {
+    "core/internal/frag/frag.go": "0b4f86f1ae1205fe5ad500c57b843dd801c3dde979fd4017b434313d81f8e37e",
+    "core/client/client.go": "dce00ed818e227c41542143707f40360b6f6f335eb92c9bf1c04cbfc523c89f7",
+    "core/client/udp_defrag_integration_test.go": "5a251ad37376cdf160adcb413f570c9b3d6445f6838ee8c314ea33b5583c3016"
+  },
+  "result_sha256": "867c004e5fae45802992599905a6144058cdc595c3be8eebe391e29673195349"
+}
